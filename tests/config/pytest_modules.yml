@@ -2627,13 +2627,13 @@ salmon/quant:
   - modules/nf-core/salmon/quant/**
   - tests/modules/nf-core/salmon/quant/**
 
-sam2lca/analyze:
-  - modules/nf-core/sam2lca/analyze/**
-  - tests/modules/nf-core/sam2lca/analyze/**
-
 salsa2:
   - modules/nf-core/salsa2/**
   - tests/modules/nf-core/salsa2/**
+
+sam2lca/analyze:
+  - modules/nf-core/sam2lca/analyze/**
+  - tests/modules/nf-core/sam2lca/analyze/**
 
 sambamba/markdup:
   - modules/nf-core/sambamba/markdup/**
@@ -3187,6 +3187,10 @@ subworkflows/vcf_gather_bcftools:
 subworkflows/vcf_impute_glimpse:
   - subworkflows/nf-core/vcf_impute_glimpse/**
   - tests/subworkflows/nf-core/vcf_impute_glimpse/**
+
+subworkflows/vcf_pca_plink:
+  - subworkflows/nf-core/vcf_pca_plink/**
+  - tests/subworkflows/nf-core/vcf_pca_plink/**
 
 survivor/merge:
   - modules/nf-core/survivor/merge/**
