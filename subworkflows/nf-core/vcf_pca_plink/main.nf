@@ -7,15 +7,14 @@
 include { BCFTOOLS_NORM   as BCFTOOLS_NORM_VCF   } from '../../../modules/nf-core/bcftools/norm/main'
 include { BCFTOOLS_NORM   as BCFTOOLS_NORM_BCF   } from '../../../modules/nf-core/bcftools/norm/main'
 include { BCFTOOLS_ANNOTATE                      } from '../../../modules/nf-core/bcftools/annotate/main'
-
-include { SAMTOOLS_INDEX     } from '../../../modules/nf-core/samtools/index/main'
+include { PLINK_BCF                              } from '../../../modules/nf-core/plink/bcf/main'
 
 workflow VCF_PCA_PLINK {
 
     take:
     // TODO nf-core: edit input (take) channels
-    ch_vcf          // channel: [ val(meta), vcf, tbi ]
-    ch_reference    // channel: [ val(meta), fasta , fai ]
+    ch_vcf          // channel: [ [id:'samplename', chr:'22'], vcf, tbi ] Meta map requires 'id' and 'chr' values.
+    ch_reference    // channel: [ fasta , fai ]
 
     main:
 
@@ -34,6 +33,31 @@ workflow VCF_PCA_PLINK {
 
     BCFTOOLS_INDEX( BCFTOOLS_ANNOTATE.out.bcf )
     ch_versions = ch_versions.mix(BCFTOOLS_INDEX.out.versions.first())
+
+    PLINK_BCF( BCFTOOLS_ANNOTATE.out.bcf )
+    ch_versions = ch_versions.mix(PLINK_BCF.out.versions.first())
+
+    ch_bed = PLINK_BCF.out.bed
+    ch_bim = PLINK_BCF.out.bim
+    ch_fam = PLINK_BCF.out.fam
+    ch_bed_bim_fam = ch_bed.join(ch_bim).join(ch_fam)
+
+    PLINK_INDEP( ch_bed_bim_fam )
+    ch_versions = ch_versions.mix(PLINK_INDEP.out.versions.first())
+
+    ch_prunein = PLINK_INDEP.out.prunein
+    ch_bed_bim_bam_prunein = ch_bed_bim_fam.join(ch_prunein)
+
+    PLINK_EXTRACT( ch_bed_bim_bam_prunein )
+    ch_versions = ch_versions.mix(PLINK_EXTRACT.out.versions.first())
+
+    PLINK_MERGE( ch_bed_bim_fam )
+    ch_versions = ch_versions.mix(PLINK_MERGE.out.versions.first())
+
+
+
+
+    ch_versions = ch_versions.mix(PLINK_BCF.out.versions.first())
 
 
     emit:
