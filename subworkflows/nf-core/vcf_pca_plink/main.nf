@@ -7,7 +7,11 @@
 include { BCFTOOLS_NORM   as BCFTOOLS_NORM_VCF   } from '../../../modules/nf-core/bcftools/norm/main'
 include { BCFTOOLS_NORM   as BCFTOOLS_NORM_BCF   } from '../../../modules/nf-core/bcftools/norm/main'
 include { BCFTOOLS_ANNOTATE                      } from '../../../modules/nf-core/bcftools/annotate/main'
+include { BCFTOOLS_INDEX                         } from '../../../modules/nf-core/bcftools/index/main'
 include { PLINK_BCF                              } from '../../../modules/nf-core/plink/bcf/main'
+include { PLINK_INDEP                            } from '../../../modules/nf-core/plink/indep/main'
+include { PLINK_EXTRACT                          } from '../../../modules/nf-core/plink/extract/main'
+
 
 workflow VCF_PCA_PLINK {
 
@@ -42,7 +46,11 @@ workflow VCF_PCA_PLINK {
     ch_fam = PLINK_BCF.out.fam
     ch_bed_bim_fam = ch_bed.join(ch_bim).join(ch_fam)
 
-    PLINK_INDEP( ch_bed_bim_fam )
+    ch_window_size = Channel.value(50)
+    ch_variant_count = Channel.value(5)
+    ch_variance_inflation_factor = Channel.value(1.5)
+
+    PLINK_INDEP( ch_bed_bim_fam, ch_window_size, ch_variant_count, ch_variance_inflation_factor )
     ch_versions = ch_versions.mix(PLINK_INDEP.out.versions.first())
 
     ch_prunein = PLINK_INDEP.out.prunein
@@ -51,20 +59,13 @@ workflow VCF_PCA_PLINK {
     PLINK_EXTRACT( ch_bed_bim_bam_prunein )
     ch_versions = ch_versions.mix(PLINK_EXTRACT.out.versions.first())
 
-    PLINK_MERGE( ch_bed_bim_fam )
-    ch_versions = ch_versions.mix(PLINK_MERGE.out.versions.first())
-
-
-
-
-    ch_versions = ch_versions.mix(PLINK_BCF.out.versions.first())
 
 
     emit:
     // TODO nf-core: edit emitted channels
-    bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]
-    bai      = SAMTOOLS_INDEX.out.bai          // channel: [ val(meta), [ bai ] ]
-    csi      = SAMTOOLS_INDEX.out.csi          // channel: [ val(meta), [ csi ] ]
+    bed      = PLINK_EXTRACT.out.bed           // channel: [ val(meta), [ bed ] ]
+    bim      = PLINK_EXTRACT.out.bim          // channel: [ val(meta), [ bim ] ]
+    fam      = PLINK_EXTRACT.out.fam          // channel: [ val(meta), [ fam ] ]
 
     versions = ch_versions                     // channel: [ versions.yml ]
 }
