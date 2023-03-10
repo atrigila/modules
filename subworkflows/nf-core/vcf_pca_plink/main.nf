@@ -4,13 +4,14 @@
 //               https://nf-co.re/join
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
-include { BCFTOOLS_NORM   as BCFTOOLS_NORM_VCF   } from '../../../modules/nf-core/bcftools/norm/main'
-include { BCFTOOLS_NORM   as BCFTOOLS_NORM_BCF   } from '../../../modules/nf-core/bcftools/norm/main'
-include { BCFTOOLS_ANNOTATE                      } from '../../../modules/nf-core/bcftools/annotate/main'
-include { BCFTOOLS_INDEX                         } from '../../../modules/nf-core/bcftools/index/main'
-include { PLINK_BCF                              } from '../../../modules/nf-core/plink/bcf/main'
-include { PLINK_INDEP                            } from '../../../modules/nf-core/plink/indep/main'
-include { PLINK_EXTRACT                          } from '../../../modules/nf-core/plink/extract/main'
+include { BCFTOOLS_NORM   as BCFTOOLS_NORM_VCF         } from '../../../modules/nf-core/bcftools/norm/main'
+include { BCFTOOLS_NORM   as BCFTOOLS_NORM_BCF         } from '../../../modules/nf-core/bcftools/norm/main'
+include { BCFTOOLS_ANNOTATE                            } from '../../../modules/nf-core/bcftools/annotate/main'
+include { BCFTOOLS_INDEX  as BCFTOOLS_INDEX_ANNOTATE   } from '../../../modules/nf-core/bcftools/index/main'
+include { BCFTOOLS_INDEX                               } from '../../../modules/nf-core/bcftools/index/main'
+include { PLINK_BCF                                    } from '../../../modules/nf-core/plink/bcf/main'
+include { PLINK_INDEP                                  } from '../../../modules/nf-core/plink/indep/main'
+include { PLINK_EXTRACT                                } from '../../../modules/nf-core/plink/extract/main'
 
 
 workflow VCF_PCA_PLINK {
@@ -26,16 +27,21 @@ workflow VCF_PCA_PLINK {
 
     // TODO nf-core: substitute modules here for the modules of your subworkflow
 
-    BCFTOOLS_NORM_VCF ( ch_vcf )
+    BCFTOOLS_NORM_VCF ( ch_vcf, ch_reference )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM_VCF.out.versions.first())
 
-    BCFTOOLS_ANNOTATE ( BCFTOOLS_NORM.out.vcf )
+    BCFTOOLS_ANNOTATE ( BCFTOOLS_NORM_VCF.out.vcf )
     ch_versions = ch_versions.mix(BCFTOOLS_ANNOTATE.out.versions.first())
 
-    BCFTOOLS_NORM_BCF( BCFTOOLS_ANNOTATE.out.vcf )
+    BCFTOOLS_INDEX_ANNOTATE( BCFTOOLS_ANNOTATE.out.vcf )
+    ch_versions = ch_versions.mix(BCFTOOLS_INDEX_ANNOTATE.out.versions.first())
+
+    ch_annotated_vcf_tbi = BCFTOOLS_ANNOTATE.out.vcf.join(BCFTOOLS_INDEX_ANNOTATE.out.tbi)
+
+    BCFTOOLS_NORM_BCF( ch_annotated_vcf_tbi, ch_reference )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM_BCF.out.versions.first())
 
-    BCFTOOLS_INDEX( BCFTOOLS_ANNOTATE.out.bcf )
+    BCFTOOLS_INDEX( BCFTOOLS_NORM_BCF.out.vcf )
     ch_versions = ch_versions.mix(BCFTOOLS_INDEX.out.versions.first())
 
     PLINK_BCF( BCFTOOLS_ANNOTATE.out.bcf )
