@@ -13,8 +13,8 @@ workflow test_vcf_pca_plink {
         file("https://github.com/nf-core/test-datasets/raw/gwas/data/data_shrink_chunk_4500/chr22.vcf.bgz.tbi", checkIfExists: true)
     ])
 
-    fasta = file("", checkIfExists: true)
-    fasta_fai = file("", checkIfExists: true)
+    fasta = file("https://storage.googleapis.com/gcp-public-data--broad-references/hg19/v0/Homo_sapiens_assembly19.fasta", checkIfExists: true)
+    fasta_fai = file("https://storage.googleapis.com/gcp-public-data--broad-references/hg19/v0/Homo_sapiens_assembly19.fasta.fai", checkIfExists: true)
 
     VCF_PCA_PLINK ( input, fasta )
 }
