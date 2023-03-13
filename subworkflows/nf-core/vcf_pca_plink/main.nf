@@ -1,8 +1,3 @@
-// TODO nf-core: If in doubt look at other nf-core/subworkflows to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/subworkflows
-//               You can also ask for help via your pull request or on the #subworkflows channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
-// TODO nf-core: A subworkflow SHOULD import at least two modules
 
 include { BCFTOOLS_NORM   as BCFTOOLS_NORM_VCF         } from '../../../modules/nf-core/bcftools/norm/main'
 include { BCFTOOLS_NORM   as BCFTOOLS_NORM_BCF         } from '../../../modules/nf-core/bcftools/norm/main'
@@ -17,15 +12,12 @@ include { PLINK_EXTRACT                                } from '../../../modules/
 workflow VCF_PCA_PLINK {
 
     take:
-    // TODO nf-core: edit input (take) channels
     ch_vcf          // channel: [ [id:'samplename', chr:'22'], vcf, tbi ] Meta map requires 'id' and 'chr' values.
     ch_reference    // channel: [ fasta , fai ]
 
     main:
 
     ch_versions = Channel.empty()
-
-    // TODO nf-core: substitute modules here for the modules of your subworkflow
 
     BCFTOOLS_NORM_VCF ( ch_vcf, ch_reference )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM_VCF.out.versions.first())
@@ -68,10 +60,9 @@ workflow VCF_PCA_PLINK {
 
 
     emit:
-    // TODO nf-core: edit emitted channels
     bed      = PLINK_EXTRACT.out.bed           // channel: [ val(meta), [ bed ] ]
-    bim      = PLINK_EXTRACT.out.bim          // channel: [ val(meta), [ bim ] ]
-    fam      = PLINK_EXTRACT.out.fam          // channel: [ val(meta), [ fam ] ]
+    bim      = PLINK_EXTRACT.out.bim           // channel: [ val(meta), [ bim ] ]
+    fam      = PLINK_EXTRACT.out.fam           // channel: [ val(meta), [ fam ] ]
 
     versions = ch_versions                     // channel: [ versions.yml ]
 }

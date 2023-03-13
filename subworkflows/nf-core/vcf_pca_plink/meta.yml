@@ -1,45 +1,56 @@
 name: "vcf_pca_plink"
-## TODO nf-core: Add a description of the subworkflow and list keywords
-description: Sort SAM/BAM/CRAM file
+
+description: Preprocess and prune variants from reference data (such as 1000G) to perform PCA
 keywords:
-  - sort
-  - bam
-  - sam
-  - cram
-## TODO nf-core: Add a list of the modules used in the subworkflow
+  - vcf
+  - bcf
+  - plink
+  - prune
+  - indep
+
 modules:
-  - samtools/sort
-  - samtools/index
-## TODO nf-core: List all of the variables used as input, including their types and descriptions
+  - bcftools/norm
+  - bcftools/annotate
+  - bcftools/index
+  - plink/bcf
+  - plink/indep
+  - plink/extract
+
 input:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [ id:'test' ]
-  - bam:
+  - ch_vcf:
       type: file
-      description: BAM/CRAM/SAM file
-      pattern: "*.{bam,cram,sam}"
-## TODO nf-core: List all of the variables used as output, including their types and descriptions
+      description: |
+        VCF files and their indices that should be concatenated
+        Structure: [ meta, vcf, tbi ]
+  - ch_reference:
+      type: file
+      description: |
+        Reference genome and its index file
+        Structure: [ fasta, fai ]
+
 output:
   - meta:
       type: map
       description: |
         Groovy Map containing sample information
         e.g. [ id:'test' ]
-  - bam:
+  - bed:
       type: file
-      description: Sorted BAM/CRAM/SAM file
-      pattern: "*.{bam,cram,sam}"
-  - bai:
+      description: PLINK binary biallelic genotype table
+      pattern: "*.{bed}"
+  - bim:
       type: file
-      description: BAM/CRAM/SAM samtools index
-      pattern: "*.{bai,crai,sai}"
-  - csi:
+      description: PLINK extended MAP file
+      pattern: "*.{bim}"
+  - fam:
       type: file
-      description: CSI samtools index
-      pattern: "*.csi"
+      description: PLINK sample information file
+      pattern: "*.fam"
   - versions:
       type: file
       description: File containing software versions
