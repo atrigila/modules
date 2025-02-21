@@ -3,7 +3,6 @@ nextflow_process {
     name "Test Process DREAM_DIFFERENTIAL"
     script "../main.nf"
     process "DREAM_DIFFERENTIAL"
-    config "./nextflow.config"
 
     tag "modules"
     tag "models"
