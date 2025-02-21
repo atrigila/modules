@@ -42,6 +42,15 @@ read_delim_flexible <- function(file, header = TRUE, row.names = NULL, check.nam
     return(df)
 }
 
+parse_args <- function(x) {
+  args_list <- unlist(strsplit(x, ' ?--')[[1]])[-1]
+  args_vals <- lapply(args_list, function(x) scan(text = x, what = 'character', quiet = TRUE))
+  args_vals <- lapply(args_vals, function(z) { length(z) <- 2; z })
+  parsed_args <- structure(lapply(args_vals, function(x) x[2]),
+                           names = lapply(args_vals, function(x) x[1]))
+  parsed_args[ !is.na(parsed_args) ]
+}
+
 ################################################
 ################################################
 ## PARSE PARAMETERS FROM NEXTFLOW             ##
