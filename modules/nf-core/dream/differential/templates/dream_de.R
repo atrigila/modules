@@ -51,6 +51,37 @@ parse_args <- function(x) {
   parsed_args[ !is.na(parsed_args) ]
 }
 
+#' Check if a formula contains mixed model components (random effects)
+#'
+#' This function checks if a given formula contains random effects (e.g., terms like `(1|group)`)
+#' by internally using the `findbars()` function to identify random effect terms.
+#' Duplicated from `variancePartition:::.isMixedModelFormula()`, to avoid relying on an internal function
+#'
+#' @param formula A formula object. For example, `~ condition + (1|group)`.
+#'
+#' @return A logical value: `TRUE` if the formula contains random effects, otherwise `FALSE`.
+#'
+#' @details The function checks for the presence of random effects in the formula by looking for
+#'          terms that include a `|` symbol, which indicates random effects in a mixed model.
+#'          The `findbars()` function is defined internally to identify these terms.
+#'
+#' @examples
+#' # Example formula with random effects
+#' form <- ~ 0 + condition + (1|group)
+#' is_mixed <- my_isMixedModelFormula(form)
+#' print(is_mixed)  # Output: TRUE
+#'
+#' # Example formula without random effects
+#' form_no_random <- ~ 0 + condition
+#' is_mixed_no_random <- my_isMixedModelFormula(form_no_random)
+#' print(is_mixed_no_random)  # Output: FALSE
+
+isMixedModelFormula <- function(formula) {
+
+    !is.null(lme4::findbars(as.formula(formula)))
+
+}
+
 ################################################
 ################################################
 ## PARSE PARAMETERS FROM NEXTFLOW             ##
@@ -70,7 +101,7 @@ opt <- list(
   exclude_samples_col = NULL, # Column for excluding samples
   exclude_samples_values = NULL, # Values for excluding samples
   number             = Inf, # Maximum number of results
-  adjust.method      = "BH", # Adjustment method for topTable
+  adjust_method      = "BH", # Adjustment method for topTable
   p.value            = 1, # P-value threshold for topTable
   lfc                = 0, # Log fold-change threshold for topTable
   confint            = FALSE, # Whether to compute confidence intervals in topTable
@@ -83,7 +114,8 @@ opt <- list(
   stdev_coef_lim     = "0.1,4", # Standard deviation coefficient limits for eBayes
   trend              = FALSE, # Whether to use trend in eBayes
   robust             = FALSE, # Whether to use robust method in eBayes
-  winsor_tail_p      = "0.05,0.1" # Winsor tail probabilities for eBayes
+  winsor_tail_p      = "0.05,0.1", # Winsor tail probabilities for eBayes
+  ddf                = "adaptive" # "Specifiy 'Satterthwaite', 'Kenward-Roger', or 'adaptive' method for dream()
 )
 
 args_opt <- parse_args("$task.ext.args")
@@ -108,6 +140,17 @@ for (file_input in c("count_file", "sample_file")) {
     if (!file.exists(opt[[file_input]])) {
         stop(paste0("Value of ", file_input, ": ", opt[[file_input]], " is not a valid file"), call. = FALSE)
     }
+}
+
+## Check default values for ddf options
+ddf_valid <- c("Satterthwaite", "Kenward-Roger", "adaptive")
+if ( !opt\$ddf %in% ddf_valid ) {
+    stop(paste0("'--ddf '", opt\$ddf, "' is not a valid option from '", paste(ddf_valid, collapse = "', '"), "'"), call. = FALSE)
+}
+## Check adjust method options
+adjust_valid <- c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr")
+if (!opt\$adjust_method %in% adjust_valid && !is.null(opt\$adjust_method)) {
+        stop(paste0("'--adjust_method '", opt\$adjust_method, "' is not a valid option from '", paste(adjust_valid, collapse = "', '"), "', or NULL"), call. = FALSE)
 }
 
 # Convert specific options to numeric vectors
@@ -265,21 +308,42 @@ if ((! is.null(opt\$exclude_samples_col)) && (! is.null(opt\$exclude_samples_val
 model_vars <- c()
 
 if (!is.null(opt\$blocking_variables)) {
-    # Include blocking variables (including pairing variables if any)
-    model_vars <- c(model_vars, blocking.vars)
-}
+    cat("opt$blocking_variables:", paste(opt\$blocking_variables, collapse = ' '), "\n")
+    print(opt\$blocking_variables)
 
-# Add the contrast variable at the end
-model_vars <- c(model_vars, contrast_variable)
+    # Include blocking variables (including pairing variables if any)
+    for (VARIABLE in opt\$blocking_variables) {
+        cat("Adding", VARIABLE, "factor to formula\n")
+        ## Create a string to reconstruct Wilkinson formula " (1 | variable )"
+        model_vars <- c(model_vars, paste0("(1 | ", VARIABLE, ")"))
+
+        ## Convert the variable into factor
+        if (!is.numeric(sample.sheet[[ VARIABLE ]])) {
+            cat("Converting into factor\n")
+            sample.sheet[[ VARIABLE ]] <- as.factor(sample.sheet[[ VARIABLE ]])
+        }
+    }
+}
 
 # Construct the model formula
-model <- paste('~ 0 +', paste(model_vars, collapse = '+'))
+## Expected structure:
+## "~ 0 + fixed_effect + (1 | random_variable_1) + (1 | random_variable_N)"
+model <- paste(
+    '~ 0 +',
+    contrast_variable,
+    if (length(model_vars) > 0) { paste0(" +", paste(model_vars, collapse = ' + ')) } else { NULL },
+    sep = "")  ## TODO: This is limited to additive models! not possible for interaction relations
 
-# Make sure all the appropriate variables are factors
-vars_to_factor <- model_vars  # All variables in the model need to be factors
-for (v in vars_to_factor) {
-    sample.sheet[[v]] <- as.factor(sample.sheet[[v]])
-}
+cat("Model vars:", model_vars, "\n")
+cat("Model:", model, "\n")
+
+# Construct the formula
+form <- as.formula(model)
+cat("Formula:", deparse(form), "\n")
+
+## TODO: Check if the model is mixed or not, could be useful to report it later
+cat("Checking for mixed formula\n")
+mixed_form <- isMixedModelFormula(form)
 
 ################################################
 ################################################
@@ -288,6 +352,7 @@ for (v in vars_to_factor) {
 ################################################
 
 # Generate the design matrix
+cat("Creating design matrix\n")
 design <- model.matrix(
     as.formula(model),
     data=sample.sheet
@@ -296,10 +361,6 @@ design <- model.matrix(
 
 # Specify parallel processing
 param <- SnowParam(as.numeric(opt\$threads), "SOCK", progressbar = TRUE)
-
-## Set formula
-#form <- ~ Disease + (1 | Individual)
-form <- as.formula(model)
 
 # Create a DGEList object for RNA-seq data
 dge <- DGEList(counts = intensities.table)
@@ -310,40 +371,100 @@ dge <- calcNormFactors(dge)
 # estimate weights using linear mixed model of dream
 vobjDream <- voomWithDreamWeights(dge, form, sample.sheet, BPPARAM = param)
 
-# Fit the dream model on each gene
-# For the hypothesis testing, by default,
-# dream() uses the KR method for <= 20 samples,
-# otherwise it uses the Satterthwaite approximation
+# Create and export variance plot
+cat("Analyzing variance\n")
+vp <- fitExtractVarPartModel(exprObj = intensities.table, formula = update(form, ~ . - 0), data = sample.sheet, REML = opt$reml)
 
-## TODO: this is the placeholder for `L = makeContrastsDream(...)` function, whose object should be included with `L` argument in dream() function
-L <- variancePartition::makeContrastsDream(form, sample.sheet,
-    contrasts = c(
-        setNames(paste(
-            paste0(opt\$contrast_variable, opt\$target_level),
-            paste0(opt\$contrast_variable, opt\$reference_level),
-            sep = " - "), opt\$output_prefix)
+cat("Creating variance plot\n")
+var_plot <- plotVarPart(sortCols(vp))
+
+cat("Exporting variance plot\n")
+png(
+    file = paste(opt\$output_prefix, 'dream.var_plot.png', sep = '.'),
+    width = 600,
+    height = 300
+)
+plot(var_plot)
+dev.off()
+
+## Set contrast (this can be scaled for more than one comparison)
+cat("Building contrasts\n")
+L <- variancePartition::makeContrastsDream(
+    form,
+    sample.sheet,
+    contrasts = c(                                                      ## This is a named vector for all the contrast we'd like to run.
+        setNames(                                                       ## For now, it's just one contrast but we should be able to scale it with the yml somehow
+            paste(                                                      ## For a variable named `treatment`, with levels A and B
+                paste0(opt\$contrast_variable, opt\$target_level),            ## Create target value: treatmentB
+                paste0(opt\$contrast_variable, opt\$reference_level),         ## Create reference value: treatmentA
+                sep = " - "),                                               ## Set a difference between them
+            opt\$output_prefix)                                          ## Assign the name to the comparison (`contrast id`` from the yml)
         )
     )
 
 # Visualize contrast matrix
+cat("Creating and exporting contrast plot\n")
 contrasts_plot <- plotContrasts(L)
 
+# Export contrast plot
 png(
-    file = paste(opt\$output_prefix, 'dream.contrasts_plot.png', sep = '.'),
+    file = paste(opt$output_prefix, 'dream.contrasts_plot.png', sep = '.'),
     width = 600,
     height = 300
 )
 plot(contrasts_plot)
 dev.off()
 
-# fit dream model with contrasts
-fitmm <- dream(vobjDream, form, sample.sheet, L)
-fitmm <- variancePartition::eBayes(fitmm)
+
+
+# Fit the dream model on each gene
+# For the hypothesis testing, by default,
+# dream() uses the KR method for <= 20 samples,
+# otherwise it uses the Satterthwaite approximation (this is the behavior indicated with `ddf = adaptive`)
+# We can force it to use the others methods with is ddf argument
+cat("Fitting model with dream()\n")
+fitmm <-
+    dream(
+        exprObj = vobjDream,
+        formula = form,
+        data    = sample.sheet,
+        L       = L,
+        ddf     = opt\$ddf,
+        reml    = opt\$reml
+    )
+
+# Adjust results with Empirical Bayes
+## Create list of arguments for eBayes
+cat("Adjusting results with eBayes\n")
+ebayes_args <- list(
+    fit = fitmm
+)
+
+if (! is.null(opt\$proportion)){
+    ebayes_args[['proportion']] <- as.numeric(opt\$proportion)
+}
+if (! is.null(opt\$stdev.coef.lim)){
+    ebayes_args[['stdev.coef.lim']] <- as.numeric(opt\$stdev.coef.lim)
+}
+if (! is.null(opt\$trend)){
+    ebayes_args[['trend']] <- as.logical(opt\$trend)
+}
+if (! is.null(opt\$robust)){
+    ebayes_args[['robust']] <- as.logical(opt\$robust)
+}
+if (! is.null(opt\$winsor.tail.p)){
+    ebayes_args[['winsor.tail.p']] <- as.numeric(opt\$winsor.tail.p)
+}
+
+## Run variancePartition::eBayes
+fitmm <- do.call(variancePartition::eBayes, ebayes_args)
 
 # get names of available coefficients and contrasts for testing
 colnames(fitmm)
 
 # Get results of hypothesis test on coefficients of interest
+cat("Exporting results with topTable()\n")
+
 for (COEFFICIENT in opt\$output_prefix) {
 
     ## Initialize topTable() arguments
@@ -355,8 +476,8 @@ for (COEFFICIENT in opt\$output_prefix) {
     )
 
     ## Complete list with extra arguments if they were provided
-    if (! is.null(opt\$adjust.method)){
-        toptable_args[['adjust.method']] <- opt\$adjust.method
+    if (! is.null(opt\$adjust_method)){
+        toptable_args[['adjust_method']] <- opt\$adjust_method
     }
     if (! is.null(opt\$p.value)){
         toptable_args[['p.value']] <- as.numeric(opt\$p.value)
@@ -369,7 +490,7 @@ for (COEFFICIENT in opt\$output_prefix) {
     }
 
     ## generate topTable
-    comp.results <- do.call(topTable, toptable_args)[rownames(intensities.table),]
+    comp.results <- do.call(variancePartition::topTable, toptable_args)[rownames(intensities.table),]
 
     ## Export topTable
     write.table(
