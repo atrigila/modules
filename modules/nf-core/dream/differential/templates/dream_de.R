@@ -56,75 +56,41 @@ parse_args <- function(x) {
 ## PARSE PARAMETERS FROM NEXTFLOW             ##
 ################################################
 ################################################
-library(optparse)
-
-# Define the full list of options
-option_list <- list(
-    make_option(c("-o", "--output_prefix"), type = "character", default = "dream_analysis",
-        help = "Prefix for output files [default:  %default]"),
-    make_option(c("-c", "--count_file"), type = "character", default = NULL,
-        help = "File containing raw counts [default:  %default]"),
-    make_option(c("-s", "--sample_file"), type = "character", default = NULL,
-        help = "File containing sample information [default:  %default]"),
-    make_option(c("--contrast_variable"), type = "character", default = NULL,
-        help = "Variable for contrast [default:  %default"),
-    make_option(c("--reference_level"), type = "character", default = NULL,
-        help = "Reference level for the contrast [default:  %default]"),
-    make_option(c("--target_level"), type = "character", default = NULL,
-        help = "Target level for the contrast [default:  %default]"),
-    make_option(c("--blocking_variables"), type = "character", default = NULL,
-        help = "Blocking variables for the analysis [default: %default]"),
-    make_option(c("--sample_id_col"), type = "character", default = "experiment_accession",
-        help = "Column name for sample IDs [default: %default]"),
-    make_option(c("--subset_to_contrast_samples"), type = "logical", default = FALSE,
-        help = "Whether to subset to contrast samples [default: %default]"),
-    make_option(c("--exclude_samples_col"), type = "character", default = NULL,
-        help = "Column for excluding samples [default: %default]"),
-    make_option(c("--exclude_samples_values"), type = "character", default = NULL,
-        help = "Values for excluding samples [default: %default]"),
-    make_option(c("--threads"), type = "numeric", default = 1,
-        help = "Number of threads for multithreading [default: %default]"),
-    make_option(c("--number"), type = "numeric", default = Inf,
-        help = "Maximum number of results [default: %default]"),
-    make_option(c("--ndups"), type = "numeric", default = NULL,
-        help = "Number of duplicates for lmFit [default: %default]"),
-    make_option(c("--spacing"), type = "numeric", default = NULL,
-        help = "Spacing for lmFit [default: %default]"),
-    make_option(c("--block"), type = "character", default = NULL,
-        help = "Block design for lmFit [default: %default]"),
-    make_option(c("--correlation"), type = "numeric", default = NULL,
-        help = "Correlation for lmFit [default: %default]"),
-    make_option(c("--method"), type = "character", default = "ls",
-        help = "Method for lmFit [default: %default]"),
-    make_option(c("--proportion"), type = "numeric", default = 0.01,
-        help = "Proportion for eBayes [default: %default]"),
-    make_option(c("--stdev_coef_lim"), type = "character", default = "0.1,4",
-        help = "Standard deviation coefficient limits for eBayes [default: %default]"),
-    make_option(c("--trend"), type = "logical", default = FALSE,
-        help = "Whether to use trend in eBayes [default: %default]"),
-    make_option(c("--robust"), type = "logical", default = FALSE,
-        help = "Whether to use robust method in eBayes [default: %default]"),
-    make_option(c("--winsor_tail_p"), type = "character", default = "0.05,0.1",
-        help = "Winsor tail probabilities for eBayes [default: %default]"),
-    make_option(c("--adjust_method"), type = "character", default = "BH",
-        help = "Adjustment method for topTable [default: %default]"),
-    make_option(c("--p_value"), type = "numeric", default = 1,
-        help = "P-value threshold for topTable [default: %default]"),
-    make_option(c("--lfc"), type = "numeric", default = 0,
-        help = "Log fold-change threshold for topTable [default: %default]"),
-    make_option(c("--confint"), type = "logical", default = FALSE,
-        help = "Whether to compute confidence intervals in topTable [default: %default]")
+opt <- list(
+  output_prefix      = "$meta.contrast_id",
+  count_file         = "$counts",
+  sample_file        = "$samplesheet",
+  contrast_variable  = "$meta.contrast_variable",
+  reference_level    = "$meta.contrast_reference",
+  target_level       = "$meta.contrast_target",
+  blocking_variables = "$meta.blocking_factors",  # semicolon-separated if present
+  sample_id_col      = "experiment_accession",
+  threads            = "$task.cpus",
+  number             = 100,
+  adjust_method      = NULL,
+  p_value            = NULL,
+  lfc                = NULL,
+  confint            = NULL,
+  ndups              = NULL,
+  spacing            = NULL,
+  block              = NULL,
+  correlation        = NULL,
+  method             = "ls",
+  proportion         = 0.01,
+  stdev_coef_lim     = "0.1,4",
+  trend              = FALSE,
+  robust             = FALSE,
+  winsor_tail_p      = "0.05,0.1"
 )
 
-# Parse options
-description <-
-"This script performs differential gene expression analysis using the R 'dream' package from 'variancePartition'.\n\n
-It requires the following input files:
-    1. A counts table (gene expression data)
-    2. A variable, reference and contrast levels (for specifying the contrasts in the analysis)
-    3. A sample sheet (sample metadata and experimental setup)."
+args_opt <- parse_args("$task.ext.args")
 
-opt <- parse_args(OptionParser(option_list = option_list, description = description))
+for (ao in names(args_opt)) {
+  if (!ao %in% names(opt)) {
+    stop(paste("Invalid option:", ao))
+  }
+  opt[[ao]] <- args_opt[[ao]]
+}
 
 # Check if required parameters have been provided
 required_opts <- c("contrast_variable", "reference_level", "target_level", "output_prefix", "count_file", "sample_file")
