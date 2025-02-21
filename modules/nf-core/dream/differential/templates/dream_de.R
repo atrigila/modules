@@ -57,30 +57,33 @@ parse_args <- function(x) {
 ################################################
 ################################################
 opt <- list(
-  output_prefix      = "$meta.contrast_id",
-  count_file         = "$counts",
-  sample_file        = "$samplesheet",
-  contrast_variable  = "$meta.contrast_variable",
-  reference_level    = "$meta.contrast_reference",
-  target_level       = "$meta.contrast_target",
-  blocking_variables = "$meta.blocking_factors",  # semicolon-separated if present
-  sample_id_col      = "experiment_accession",
-  threads            = "$task.cpus",
-  number             = 100,
-  adjust_method      = NULL,
-  p_value            = NULL,
-  lfc                = NULL,
-  confint            = NULL,
-  ndups              = NULL,
-  spacing            = NULL,
-  block              = NULL,
-  correlation        = NULL,
-  method             = "ls",
-  proportion         = 0.01,
-  stdev_coef_lim     = "0.1,4",
-  trend              = FALSE,
-  robust             = FALSE,
-  winsor_tail_p      = "0.05,0.1"
+  output_prefix      = "$meta.contrast_id", # Prefix for output files
+  count_file         = "$counts", # File containing raw counts
+  sample_file        = "$samplesheet", # File containing sample information
+  contrast_variable  = "$meta.contrast_variable", # Variable for contrast
+  reference_level    = "$meta.contrast_reference", # Reference level for the contrast
+  target_level       = "$meta.contrast_target", # Target level for the contrast
+  blocking_variables = "$meta.blocking_factors", # Blocking variables for the analysis
+  sample_id_col      = "experiment_accession", # Column name for sample IDs
+  threads            = "$task.cpus", # Number of threads for multithreading
+  subset_to_contrast_samples            = FALSE, # Whether to subset to contrast samples
+  exclude_samples_col = NULL, # Column for excluding samples
+  exclude_samples_values = NULL, # Values for excluding samples
+  number             = Inf, # Maximum number of results
+  adjust.method      = "BH", # Adjustment method for topTable
+  p.value            = 1, # P-value threshold for topTable
+  lfc                = 0, # Log fold-change threshold for topTable
+  confint            = FALSE, # Whether to compute confidence intervals in topTable
+  ndups              = NULL, # Number of duplicates for lmFit
+  spacing            = NULL, # Spacing for lmFit
+  block              = NULL, # Block design for lmFit
+  correlation        = NULL, # Correlation for lmFit
+  method             = "ls", # Method for lmFit
+  proportion         = 0.01, # Proportion for eBayes
+  stdev_coef_lim     = "0.1,4", # Standard deviation coefficient limits for eBayes
+  trend              = FALSE, # Whether to use trend in eBayes
+  robust             = FALSE, # Whether to use robust method in eBayes
+  winsor_tail_p      = "0.05,0.1" # Winsor tail probabilities for eBayes
 )
 
 args_opt <- parse_args("$task.ext.args")
@@ -110,6 +113,11 @@ for (file_input in c("count_file", "sample_file")) {
 # Convert specific options to numeric vectors
 vector_opt <- c("stdev_coef_lim", "winsor_tail_p")
 opt[vector_opt] <- lapply(strsplit(unlist(opt[vector_opt]), ","), as.numeric)
+
+# Convert string "null" to NULL
+if (!is.null(opt\$blocking_variables) && tolower(opt\$blocking_variables) == "null") {
+    opt\$blocking_variables <- NULL
+}
 
 # Save first version of RData, useful for debuging with all original parameters already set
 save.image("dream_de.RData")
@@ -285,8 +293,6 @@ design <- model.matrix(
     data=sample.sheet
 )
 
-## TODO: START ADAPTING TO DREAM IN HERE!
-## NEW STARTS HERE!
 
 # Specify parallel processing
 param <- SnowParam(as.numeric(opt\$threads), "SOCK", progressbar = TRUE)
@@ -416,3 +422,28 @@ sink()
 ################################################
 
 save.image("dream_de.RData")
+
+################################################
+################################################
+## VERSIONS FILE                              ##
+################################################
+################################################
+
+r.version <- strsplit(version[['version.string']], ' ')[[1]][3]
+edger.version <- as.character(packageVersion('edgeR'))
+variancePartition.version <- as.character(packageVersion('variancePartition'))
+
+
+writeLines(
+    c(
+        '"${task.process}":',
+        paste('    r-base:', r.version),
+        paste('    bioconductor-edger:', edger.version),
+        paste('    variancePartition:', variancePartition.version)
+    ),
+'versions.yml')
+
+################################################
+################################################
+################################################
+################################################
