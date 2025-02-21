@@ -158,28 +158,28 @@ library(variancePartition)
 ################################################
 ################################################
 
-intensities.table <- read_delim_flexible(file = opt$count_file)
-sample.sheet <- read_delim_flexible(file = opt$sample_file)
+intensities.table <- read_delim_flexible(file = opt\$count_file)
+sample.sheet <- read_delim_flexible(file = opt\$sample_file)
 
 # Deal with spaces that may be in sample column
-opt$sample_id_col <- make.names(opt$sample_id_col)
+opt\$sample_id_col <- make.names(opt\$sample_id_col)
 
-if (! opt$sample_id_col %in% colnames(sample.sheet)){
-    stop(paste0("Specified sample ID column '", opt$sample_id_col, "' is not in the sample sheet"))
+if (! opt\$sample_id_col %in% colnames(sample.sheet)){
+    stop(paste0("Specified sample ID column '", opt\$sample_id_col, "' is not in the sample sheet"))
 }
 
 # Sample sheet can have duplicate rows for multiple sequencing runs, so uniqify
 # before assigning row names
 
-sample.sheet <- sample.sheet[! duplicated(sample.sheet[[opt$sample_id_col]]), ]
-rownames(sample.sheet) <- sample.sheet[[opt$sample_id_col]]
+sample.sheet <- sample.sheet[! duplicated(sample.sheet[[opt\$sample_id_col]]), ]
+rownames(sample.sheet) <- sample.sheet[[opt\$sample_id_col]]
 
 # Check that all samples specified in the input sheet are present in the
 # intensities table. Assuming they are, subset and sort the count table to
 # match the sample sheet
 
 missing_samples <-
-    sample.sheet[!rownames(sample.sheet) %in% colnames(intensities.table), opt$sample_id_col]
+    sample.sheet[!rownames(sample.sheet) %in% colnames(intensities.table), opt\$sample_id_col]
 
 if (length(missing_samples) > 0) {
     stop(paste(
@@ -200,7 +200,7 @@ if (length(missing_samples) > 0) {
 ################################################
 ################################################
 
-contrast_variable <- make.names(opt$contrast_variable)
+contrast_variable <- make.names(opt\$contrast_variable)
 blocking.vars <- c()
 
 if (!contrast_variable %in% colnames(sample.sheet)) {
@@ -211,7 +211,7 @@ if (!contrast_variable %in% colnames(sample.sheet)) {
         '" not in sample sheet'
         )
     )
-} else if (any(!c(opt$reference_level, opt$target_level) %in% sample.sheet[[contrast_variable]])) {
+} else if (any(!c(opt\$reference_level, opt\$target_level) %in% sample.sheet[[contrast_variable]])) {
     stop(
         paste0(
         'Please choose reference and target levels that are present in the ',
@@ -219,8 +219,8 @@ if (!contrast_variable %in% colnames(sample.sheet)) {
         ' column of the sample sheet'
         )
     )
-} else if (!is.null(opt$blocking_variables)) {
-    blocking.vars = make.names(unlist(strsplit(opt$blocking_variables, split = ';')))
+} else if (!is.null(opt\$blocking_variables)) {
+    blocking.vars = make.names(unlist(strsplit(opt\$blocking_variables, split = ';')))
     if (!all(blocking.vars %in% colnames(sample.sheet))) {
         missing_block <- paste(blocking.vars[! blocking.vars %in% colnames(sample.sheet)], collapse = ',')
         stop(
@@ -233,23 +233,23 @@ if (!contrast_variable %in% colnames(sample.sheet)) {
 }
 
 # Handle conflicts between blocking variables and block
-if (!is.null(opt$block) && !is.null(opt$blocking_variables)) {
-    if (opt$block %in% blocking.vars) {
-        warning(paste("Variable", opt$block, "is specified both as a fixed effect and a random effect. It will be treated as a random effect only."))
-        blocking.vars <- setdiff(blocking.vars, opt$block)
+if (!is.null(opt\$block) && !is.null(opt\$blocking_variables)) {
+    if (opt\$block %in% blocking.vars) {
+        warning(paste("Variable", opt\$block, "is specified both as a fixed effect and a random effect. It will be treated as a random effect only."))
+        blocking.vars <- setdiff(blocking.vars, opt\$block)
         if (length(blocking.vars) == 0) {
-            opt$blocking_variables <- NULL
+            opt\$blocking_variables <- NULL
         } else {
-            opt$blocking_variables <- paste(blocking.vars, collapse = ';')
+            opt\$blocking_variables <- paste(blocking.vars, collapse = ';')
         }
     }
 }
 
 # Optionally, subset to only the samples involved in the contrast
 
-if (opt$subset_to_contrast_samples){
-    sample_selector <- sample.sheet[[contrast_variable]] %in% c(opt$target_level, opt$reference_level)
-    selected_samples <- sample.sheet[sample_selector, opt$sample_id_col]
+if (opt\$subset_to_contrast_samples){
+    sample_selector <- sample.sheet[[contrast_variable]] %in% c(opt\$target_level, opt\$reference_level)
+    selected_samples <- sample.sheet[sample_selector, opt\$sample_id_col]
     intensities.table <- intensities.table[, selected_samples]
     sample.sheet <- sample.sheet[selected_samples, ]
 }
@@ -257,17 +257,17 @@ if (opt$subset_to_contrast_samples){
 # Optionally, remove samples with specified values in a given field (probably
 # don't use this as well as the above)
 
-if ((! is.null(opt$exclude_samples_col)) && (! is.null(opt$exclude_samples_values))){
-    exclude_values = unlist(strsplit(opt$exclude_samples_values, split = ';'))
+if ((! is.null(opt\$exclude_samples_col)) && (! is.null(opt\$exclude_samples_values))){
+    exclude_values = unlist(strsplit(opt\$exclude_samples_values, split = ';'))
 
-    if (! opt$exclude_samples_col %in% colnames(sample.sheet)){
-        stop(paste(opt$exclude_samples_col, ' specified to subset samples is not a valid sample sheet column'))
+    if (! opt\$exclude_samples_col %in% colnames(sample.sheet)){
+        stop(paste(opt\$exclude_samples_col, ' specified to subset samples is not a valid sample sheet column'))
     }
 
-    print(paste0('Excluding samples with values of ', opt$exclude_samples_values, ' in ', opt$exclude_samples_col))
-    sample_selector <- ! sample.sheet[[opt$exclude_samples_col]] %in% exclude_values
+    print(paste0('Excluding samples with values of ', opt\$exclude_samples_values, ' in ', opt\$exclude_samples_col))
+    sample_selector <- ! sample.sheet[[opt\$exclude_samples_col]] %in% exclude_values
 
-    selected_samples <- sample.sheet[sample_selector, opt$sample_id_col]
+    selected_samples <- sample.sheet[sample_selector, opt\$sample_id_col]
     intensities.table <- intensities.table[, selected_samples]
     sample.sheet <- sample.sheet[selected_samples, ]
 }
@@ -281,7 +281,7 @@ if ((! is.null(opt$exclude_samples_col)) && (! is.null(opt$exclude_samples_value
 # Build the model formula with blocking variables first
 model_vars <- c()
 
-if (!is.null(opt$blocking_variables)) {
+if (!is.null(opt\$blocking_variables)) {
     # Include blocking variables (including pairing variables if any)
     model_vars <- c(model_vars, blocking.vars)
 }
@@ -314,7 +314,7 @@ design <- model.matrix(
 ## NEW STARTS HERE!
 
 # Specify parallel processing
-param <- SnowParam(as.numeric(opt$threads), "SOCK", progressbar = TRUE)
+param <- SnowParam(as.numeric(opt\$threads), "SOCK", progressbar = TRUE)
 
 ## Set formula
 #form <- ~ Disease + (1 | Individual)
@@ -338,9 +338,9 @@ vobjDream <- voomWithDreamWeights(dge, form, sample.sheet, BPPARAM = param)
 L <- variancePartition::makeContrastsDream(form, sample.sheet,
     contrasts = c(
         setNames(paste(
-            paste0(opt$contrast_variable, opt$target_level),
-            paste0(opt$contrast_variable, opt$reference_level),
-            sep = " - "), opt$output_prefix)
+            paste0(opt\$contrast_variable, opt\$target_level),
+            paste0(opt\$contrast_variable, opt\$reference_level),
+            sep = " - "), opt\$output_prefix)
         )
     )
 
@@ -348,7 +348,7 @@ L <- variancePartition::makeContrastsDream(form, sample.sheet,
 contrasts_plot <- plotContrasts(L)
 
 png(
-    file = paste(opt$output_prefix, 'dream.contrasts_plot.png', sep = '.'),
+    file = paste(opt\$output_prefix, 'dream.contrasts_plot.png', sep = '.'),
     width = 600,
     height = 300
 )
@@ -363,7 +363,7 @@ fitmm <- variancePartition::eBayes(fitmm)
 colnames(fitmm)
 
 # Get results of hypothesis test on coefficients of interest
-for (COEFFICIENT in opt$output_prefix) {
+for (COEFFICIENT in opt\$output_prefix) {
 
     ## Initialize topTable() arguments
     toptable_args <- list(
@@ -374,17 +374,17 @@ for (COEFFICIENT in opt$output_prefix) {
     )
 
     ## Complete list with extra arguments if they were provided
-    if (! is.null(opt$adjust.method)){
-        toptable_args[['adjust.method']] <- opt$adjust.method
+    if (! is.null(opt\$adjust.method)){
+        toptable_args[['adjust.method']] <- opt\$adjust.method
     }
-    if (! is.null(opt$p.value)){
-        toptable_args[['p.value']] <- as.numeric(opt$p.value)
+    if (! is.null(opt\$p.value)){
+        toptable_args[['p.value']] <- as.numeric(opt\$p.value)
     }
-    if (! is.null(opt$lfc)){
-        toptable_args[['lfc']] <- as.numeric(opt$lfc)
+    if (! is.null(opt\$lfc)){
+        toptable_args[['lfc']] <- as.numeric(opt\$lfc)
     }
-    if (! is.null(opt$confint)){
-        toptable_args[['confint']] <- as.logical(opt$confint)
+    if (! is.null(opt\$confint)){
+        toptable_args[['confint']] <- as.logical(opt\$confint)
     }
 
     ## generate topTable
@@ -393,7 +393,7 @@ for (COEFFICIENT in opt$output_prefix) {
     ## Export topTable
     write.table(
         comp.results,
-        file = paste(opt$output_prefix, 'dream.results.tsv', sep = '.'),
+        file = paste(opt\$output_prefix, 'dream.results.tsv', sep = '.'),
         col.names = TRUE,
         row.names = FALSE,
         sep = '\t',
@@ -412,7 +412,7 @@ for (COEFFICIENT in opt$output_prefix) {
 # Dispersion plot
 
 png(
-    file = paste(opt$output_prefix, 'dream.mean_difference.png', sep = '.'),
+    file = paste(opt\$output_prefix, 'dream.mean_difference.png', sep = '.'),
     width = 600,
     height = 600
 )
@@ -420,10 +420,10 @@ plotMD(fitmm)
 dev.off()
 
 # R object for other processes to use
-saveRDS(fitmm, file = paste(opt$output_prefix, 'MArrayMM.dream.rds', sep = '.'))
+saveRDS(fitmm, file = paste(opt\$output_prefix, 'MArrayMM.dream.rds', sep = '.'))
 
 # Save model to file
-write(model, file=paste(opt$output_prefix, 'dream.model.txt', sep = '.'))
+write(model, file=paste(opt\$output_prefix, 'dream.model.txt', sep = '.'))
 
 ################################################
 ################################################
@@ -431,7 +431,7 @@ write(model, file=paste(opt$output_prefix, 'dream.model.txt', sep = '.'))
 ################################################
 ################################################
 
-sink(paste(opt$output_prefix, "R_sessionInfo.log", sep = '.'))
+sink(paste(opt\$output_prefix, "R_sessionInfo.log", sep = '.'))
 print(sessionInfo())
 sink()
 
