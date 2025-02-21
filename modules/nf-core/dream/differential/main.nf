@@ -24,33 +24,7 @@ process DREAM_DIFFERENTIAL {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix                 = task.ext.prefix ?: meta.id
-    def blocking_factors       = meta.blocking_factors ? "--blocking_variables '${meta.blocking_factors.join(';')}'" : ''
-    def exclude_samples_col    = meta.exclude_samples_col ? "--exclude_samples_col '${meta.exclude_samples_col.join(';')}'" : ''
-    def exclude_samples_values = meta.exclude_samples_values ? "--exclude_samples_values '${meta.exclude_samples_values.join(';')}'" : ''
-    """
-    dream_de.R  \\
-        --output_prefix ${meta.contrast_id} \\
-        --count_file ${counts} \\
-        --sample_file ${samplesheet} \\
-        --contrast_variable ${meta.contrast_variable} \\
-        --reference_level ${meta.contrast_reference} \\
-        --target_level ${meta.contrast_target} \\
-        ${blocking_factors} \\
-        ${exclude_samples_col} \\
-        ${exclude_samples_values} \\
-        --threads ${task.cpus} \\
-        --number 100 ## ??
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
-        r-optparse: \$(Rscript -e "library(optparse); cat(as.character(packageVersion('optparse')))")
-        r-edger: \$(Rscript -e "library(edgeR); cat(as.character(packageVersion('edgeR')))")
-        r-variancepartition: \$(Rscript -e "library(variancePartition); cat(as.character(packageVersion('variancePartition')))")
-        r-biocparallel: \$(Rscript -e "library(BiocParallel); cat(as.character(packageVersion('BiocParallel')))")
-    END_VERSIONS
-    """
+    template 'dream_de.R'
 
     stub:
     prefix = task.ext.prefix   ?: "${meta.id}"
@@ -65,10 +39,8 @@ process DREAM_DIFFERENTIAL {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
-        r-optparse: \$(Rscript -e "library(optparse); cat(as.character(packageVersion('optparse')))")
         r-edger: \$(Rscript -e "library(edgeR); cat(as.character(packageVersion('edgeR')))")
         r-variancepartition: \$(Rscript -e "library(variancePartition); cat(as.character(packageVersion('variancePartition')))")
-        r-piocparallel: \$(Rscript -e "library(BiocParallel); cat(as.character(packageVersion('BiocParallel')))")
     END_VERSIONS
     """
 }
