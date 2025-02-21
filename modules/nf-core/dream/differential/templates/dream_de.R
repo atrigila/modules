@@ -5,6 +5,7 @@
 ## Functions                                  ##
 ################################################
 ################################################
+cat("Initializing functions\n")
 
 #' Flexibly read CSV or TSV files
 #'
@@ -42,15 +43,6 @@ read_delim_flexible <- function(file, header = TRUE, row.names = NULL, check.nam
     return(df)
 }
 
-parse_args <- function(x) {
-  args_list <- unlist(strsplit(x, ' ?--')[[1]])[-1]
-  args_vals <- lapply(args_list, function(x) scan(text = x, what = 'character', quiet = TRUE))
-  args_vals <- lapply(args_vals, function(z) { length(z) <- 2; z })
-  parsed_args <- structure(lapply(args_vals, function(x) x[2]),
-                           names = lapply(args_vals, function(x) x[1]))
-  parsed_args[ !is.na(parsed_args) ]
-}
-
 #' Check if a formula contains mixed model components (random effects)
 #'
 #' This function checks if a given formula contains random effects (e.g., terms like `(1|group)`)
@@ -82,6 +74,16 @@ isMixedModelFormula <- function(formula) {
 
 }
 
+parse_args <- function(x) {
+  args_list <- unlist(strsplit(x, ' ?--')[[1]])[-1]
+  args_vals <- lapply(args_list, function(x) scan(text = x, what = 'character', quiet = TRUE))
+  args_vals <- lapply(args_vals, function(z) { length(z) <- 2; z })
+  parsed_args <- structure(lapply(args_vals, function(x) x[2]),
+                           names = lapply(args_vals, function(x) x[1]))
+  parsed_args[ !is.na(parsed_args) ]
+}
+
+
 ################################################
 ################################################
 ## PARSE PARAMETERS FROM NEXTFLOW             ##
@@ -101,7 +103,7 @@ opt <- list(
   exclude_samples_col = NULL, # Column for excluding samples
   exclude_samples_values = NULL, # Values for excluding samples
   number             = Inf, # Maximum number of results
-  adjust_method      = "BH", # Adjustment method for topTable
+  adjust.method      = "BH", # Adjustment method for topTable
   p.value            = 1, # P-value threshold for topTable
   lfc                = 0, # Log fold-change threshold for topTable
   confint            = FALSE, # Whether to compute confidence intervals in topTable
@@ -128,6 +130,8 @@ for (ao in names(args_opt)) {
 }
 
 # Check if required parameters have been provided
+cat("Validating required arguments\n")
+
 required_opts <- c("contrast_variable", "reference_level", "target_level", "output_prefix", "count_file", "sample_file")
 missing <- required_opts[sapply(required_opts, function(o) is.null(opt[[o]]))]
 
@@ -147,10 +151,11 @@ ddf_valid <- c("Satterthwaite", "Kenward-Roger", "adaptive")
 if ( !opt\$ddf %in% ddf_valid ) {
     stop(paste0("'--ddf '", opt\$ddf, "' is not a valid option from '", paste(ddf_valid, collapse = "', '"), "'"), call. = FALSE)
 }
+
 ## Check adjust method options
 adjust_valid <- c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr")
-if (!opt\$adjust_method %in% adjust_valid && !is.null(opt\$adjust_method)) {
-        stop(paste0("'--adjust_method '", opt\$adjust_method, "' is not a valid option from '", paste(adjust_valid, collapse = "', '"), "', or NULL"), call. = FALSE)
+if (!opt\$adjust.method %in% adjust_valid && !is.null(opt\$adjust.method)) {
+        stop(paste0("'--adjust.method '", opt\$adjust.method, "' is not a valid option from '", paste(adjust_valid, collapse = "', '"), "', or NULL"), call. = FALSE)
 }
 
 # Convert specific options to numeric vectors
@@ -163,20 +168,21 @@ if (!is.null(opt\$blocking_variables) && tolower(opt\$blocking_variables) == "nu
 }
 
 # Save first version of RData, useful for debuging with all original parameters already set
+cat("Exporting preliminary RData\n")
+
+work_dir <- getwd()                         ## for dev purposes
 save.image("dream_de.RData")
+#setwd(work_dir); load("dream_de.RData")    ## for dev purposes
 
 ################################################
 ################################################
 ## Finish loading libraries                   ##
 ################################################
 ################################################
+cat("Importing libraries\n")
 
 library(edgeR)
 library(variancePartition)
-
-## Load RData (for dev purposes)
-#setwd("/workspace/differentialabundance/results/work/fe/264e25e728b3300231e7d393e939f4")
-#load("dream_de.RData")
 
 ################################################
 ################################################
@@ -196,7 +202,6 @@ if (! opt\$sample_id_col %in% colnames(sample.sheet)){
 
 # Sample sheet can have duplicate rows for multiple sequencing runs, so uniqify
 # before assigning row names
-
 sample.sheet <- sample.sheet[! duplicated(sample.sheet[[opt\$sample_id_col]]), ]
 rownames(sample.sheet) <- sample.sheet[[opt\$sample_id_col]]
 
@@ -225,6 +230,7 @@ if (length(missing_samples) > 0) {
 ## CHECK CONTRAST SPECIFICATION               ##
 ################################################
 ################################################
+cat("Validating contrasts\n")
 
 contrast_variable <- make.names(opt\$contrast_variable)
 blocking.vars <- c()
@@ -304,11 +310,15 @@ if ((! is.null(opt\$exclude_samples_col)) && (! is.null(opt\$exclude_samples_val
 ################################################
 ################################################
 
+## TODO: START ADAPTING TO DREAM IN HERE!
+## NEW STARTS HERE!
+cat("Creating formula\n")
+
 # Build the model formula with blocking variables first
 model_vars <- c()
 
 if (!is.null(opt\$blocking_variables)) {
-    cat("opt$blocking_variables:", paste(opt\$blocking_variables, collapse = ' '), "\n")
+    cat("opt\$blocking_variables:", paste(opt\$blocking_variables, collapse = ' '), "\n")
     print(opt\$blocking_variables)
 
     # Include blocking variables (including pairing variables if any)
@@ -353,27 +363,30 @@ mixed_form <- isMixedModelFormula(form)
 
 # Generate the design matrix
 cat("Creating design matrix\n")
-design <- model.matrix(
-    as.formula(model),
-    data=sample.sheet
-)
 
+design <- model.matrix(
+    form,
+    sample.sheet
+)
 
 # Specify parallel processing
 param <- SnowParam(as.numeric(opt\$threads), "SOCK", progressbar = TRUE)
 
 # Create a DGEList object for RNA-seq data
+cat("Creating DGEList\n")
 dge <- DGEList(counts = intensities.table)
 
 ## Calculate normalization factors
+cat("Calculating normalization factors\n")
 dge <- calcNormFactors(dge)
 
 # estimate weights using linear mixed model of dream
+cat("Normalizing data\n")
 vobjDream <- voomWithDreamWeights(dge, form, sample.sheet, BPPARAM = param)
 
 # Create and export variance plot
 cat("Analyzing variance\n")
-vp <- fitExtractVarPartModel(exprObj = intensities.table, formula = update(form, ~ . - 0), data = sample.sheet, REML = opt$reml)
+vp <- fitExtractVarPartModel(exprObj = intensities.table, formula = update(form, ~ . - 0), data = sample.sheet, REML = opt\$reml)
 
 cat("Creating variance plot\n")
 var_plot <- plotVarPart(sortCols(vp))
@@ -408,13 +421,12 @@ contrasts_plot <- plotContrasts(L)
 
 # Export contrast plot
 png(
-    file = paste(opt$output_prefix, 'dream.contrasts_plot.png', sep = '.'),
+    file = paste(opt\$output_prefix, 'dream.contrasts_plot.png', sep = '.'),
     width = 600,
     height = 300
 )
 plot(contrasts_plot)
 dev.off()
-
 
 
 # Fit the dream model on each gene
@@ -462,9 +474,8 @@ fitmm <- do.call(variancePartition::eBayes, ebayes_args)
 # get names of available coefficients and contrasts for testing
 colnames(fitmm)
 
-# Get results of hypothesis test on coefficients of interest
+# Get results of hypothesis test on coefficients of interest (only one coeff for now)
 cat("Exporting results with topTable()\n")
-
 for (COEFFICIENT in opt\$output_prefix) {
 
     ## Initialize topTable() arguments
@@ -475,9 +486,9 @@ for (COEFFICIENT in opt\$output_prefix) {
         number = nrow(intensities.table)
     )
 
-    ## Complete list with extra arguments if they were provided
-    if (! is.null(opt\$adjust_method)){
-        toptable_args[['adjust_method']] <- opt\$adjust_method
+    ## Complete list with extra arguments, if they were provided
+    if (! is.null(opt\$adjust.method)){
+        toptable_args[['adjust.method']] <- opt\$adjust.method
     }
     if (! is.null(opt\$p.value)){
         toptable_args[['p.value']] <- as.numeric(opt\$p.value)
@@ -507,7 +518,7 @@ for (COEFFICIENT in opt\$output_prefix) {
 
 ################################################
 ################################################
-## Generate outputs                           ##
+## Generate other outputs                     ##
 ################################################
 ################################################
 
@@ -543,6 +554,7 @@ sink()
 ################################################
 
 save.image("dream_de.RData")
+
 
 ################################################
 ################################################
