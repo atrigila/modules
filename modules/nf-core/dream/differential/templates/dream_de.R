@@ -43,30 +43,7 @@ read_delim_flexible <- function(file, header = TRUE, row.names = NULL, check.nam
     return(df)
 }
 
-#' Check if a formula contains mixed model components (random effects)
-#'
-#' This function checks if a given formula contains random effects (e.g., terms like `(1|group)`)
-#' by internally using the `findbars()` function to identify random effect terms.
-#' Duplicated from `variancePartition:::.isMixedModelFormula()`, to avoid relying on an internal function
-#'
-#' @param formula A formula object. For example, `~ condition + (1|group)`.
-#'
-#' @return A logical value: `TRUE` if the formula contains random effects, otherwise `FALSE`.
-#'
-#' @details The function checks for the presence of random effects in the formula by looking for
-#'          terms that include a `|` symbol, which indicates random effects in a mixed model.
-#'          The `findbars()` function is defined internally to identify these terms.
-#'
-#' @examples
-#' # Example formula with random effects
-#' form <- ~ 0 + condition + (1|group)
-#' is_mixed <- my_isMixedModelFormula(form)
-#' print(is_mixed)  # Output: TRUE
-#'
-#' # Example formula without random effects
-#' form_no_random <- ~ 0 + condition
-#' is_mixed_no_random <- my_isMixedModelFormula(form_no_random)
-#' print(is_mixed_no_random)  # Output: FALSE
+
 
 isMixedModelFormula <- function(formula) {
 
@@ -117,7 +94,8 @@ opt <- list(
   trend              = FALSE, # Whether to use trend in eBayes
   robust             = FALSE, # Whether to use robust method in eBayes
   winsor_tail_p      = "0.05,0.1", # Winsor tail probabilities for eBayes
-  ddf                = "adaptive" # "Specifiy 'Satterthwaite', 'Kenward-Roger', or 'adaptive' method for dream()
+  ddf                = "adaptive", # "Specifiy 'Satterthwaite', 'Kenward-Roger', or 'adaptive' method for dream()
+  reml               = FALSE
 )
 
 args_opt <- parse_args("$task.ext.args")
@@ -324,6 +302,10 @@ if (!is.null(opt\$blocking_variables)) {
     # Include blocking variables (including pairing variables if any)
     for (VARIABLE in opt\$blocking_variables) {
         cat("Adding", VARIABLE, "factor to formula\n")
+
+        # Convert to factor
+        sample.sheet[[VARIABLE]] <- as.factor(sample.sheet[[VARIABLE]])
+
         ## Create a string to reconstruct Wilkinson formula " (1 | variable )"
         model_vars <- c(model_vars, paste0("(1 | ", VARIABLE, ")"))
 
@@ -362,6 +344,7 @@ mixed_form <- isMixedModelFormula(form)
 ################################################
 
 # Generate the design matrix
+sample.sheet[[contrast_variable]] <- as.factor(sample.sheet[[contrast_variable]])
 cat("Creating design matrix\n")
 
 design <- model.matrix(
@@ -386,7 +369,20 @@ vobjDream <- voomWithDreamWeights(dge, form, sample.sheet, BPPARAM = param)
 
 # Create and export variance plot
 cat("Analyzing variance\n")
-vp <- fitExtractVarPartModel(exprObj = intensities.table, formula = update(form, ~ . - 0), data = sample.sheet, REML = opt\$reml)
+if (!is.null(opt\$blocking_variables)) {
+  # When blocking factors exist, remove treatment so that all categorical variables are random
+  vp_formula <- update(form, ~ . - contrast_variable + 1)
+} else {
+  # When no blocking factors exist, use the original formula, but add intercept because it is required
+  vp_formula <- update(form, ~ . + 1)
+}
+
+vp <- fitExtractVarPartModel(
+  exprObj = vobjDream,
+  formula = vp_formula,
+  data = sample.sheet,
+  REML = opt\$reml
+)
 
 cat("Creating variance plot\n")
 var_plot <- plotVarPart(sortCols(vp))
@@ -456,7 +452,7 @@ if (! is.null(opt\$proportion)){
     ebayes_args[['proportion']] <- as.numeric(opt\$proportion)
 }
 if (! is.null(opt\$stdev.coef.lim)){
-    ebayes_args[['stdev.coef.lim']] <- as.numeric(opt\$stdev.coef.lim)
+    ebayes_args[['stdev.coef.lim']] <- as.numeric(opt\$stdev_coef_lim)
 }
 if (! is.null(opt\$trend)){
     ebayes_args[['trend']] <- as.logical(opt\$trend)
@@ -465,7 +461,7 @@ if (! is.null(opt\$robust)){
     ebayes_args[['robust']] <- as.logical(opt\$robust)
 }
 if (! is.null(opt\$winsor.tail.p)){
-    ebayes_args[['winsor.tail.p']] <- as.numeric(opt\$winsor.tail.p)
+    ebayes_args[['winsor.tail.p']] <- as.numeric(opt\$winsor_tail_p)
 }
 
 ## Run variancePartition::eBayes
