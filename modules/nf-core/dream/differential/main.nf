@@ -12,19 +12,18 @@ process DREAM_DIFFERENTIAL {
 
     output:
     tuple val(meta), path("*.dream.results.tsv")        , emit: results
-    tuple val(meta), path("*.dream.mean_difference.png"), emit: md_plot
-    tuple val(meta), path("*.MArrayMM.dream.rds")       , emit: rdata
-    tuple val(meta), path("*.dream.model.txt")          , emit: model
-    tuple val(meta), path('*.dream.contrasts_plot.png') , emit: contrasts_png
-    tuple val(meta), path("*.R_sessionInfo.log")        , emit: session_info
-    tuple val(meta), path("*.normalised_counts.tsv")    , emit: normalised_counts, optional: true
+    // tuple val(meta), path("*.MArrayMM.dream.rds")       , emit: rdata
+    // tuple val(meta), path("*.dream.model.txt")          , emit: model
+    // tuple val(meta), path('*.dream.contrasts_plot.png') , emit: contrasts_png
+    // tuple val(meta), path("*.R_sessionInfo.log")        , emit: session_info
+    // tuple val(meta), path("*.normalised_counts.tsv")    , emit: normalised_counts, optional: true
     path "versions.yml"                                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    template 'dream_de.R'
+    template 'dream.R'
 
     stub:
     prefix = task.ext.prefix   ?: "${meta.id}"
