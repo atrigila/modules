@@ -81,6 +81,47 @@
         },
         "timestamp": "2025-03-10T17:34:43.471218203"
     },
+    "variancePartition data - contrasts + blocking factor": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "contrast_id": "Disease_0_1",
+                            "contrast_variable": "Disease",
+                            "contrast_reference": "0",
+                            "contrast_target": "1",
+                            "blocking_factors": "Individual"
+                        },
+                        "Disease_0_1.dream.results.tsv:md5,dc85e769e19083a34955b3241465b7ef"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,a0c919600304e2aa1a474374f897cc8b"
+                ],
+                "results": [
+                    [
+                        {
+                            "contrast_id": "Disease_0_1",
+                            "contrast_variable": "Disease",
+                            "contrast_reference": "0",
+                            "contrast_target": "1",
+                            "blocking_factors": "Individual"
+                        },
+                        "Disease_0_1.dream.results.tsv:md5,dc85e769e19083a34955b3241465b7ef"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,a0c919600304e2aa1a474374f897cc8b"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-03-11T00:54:56.210166154"
+    },
     "Mus musculus - expression table - contrasts": {
         "content": [
             {
@@ -121,5 +162,28 @@
             "nextflow": "24.10.4"
         },
         "timestamp": "2025-03-10T17:30:59.943799883"
+    },
+    "variancePartition - expression table - contrasts + blocking factor": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    
+                ],
+                "results": [
+                    
+                ],
+                "versions": [
+                    
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-03-10T18:21:43.468096947"
     }
 }

@@ -38,7 +38,7 @@ opt <- list(
     sample_file        = "$samplesheet",            # File containing sample information
     contrast_variable  = "$meta.contrast_variable", # Variable for contrast (e.g., "treatment")
     contrast_reference    = "$meta.contrast_reference",# Reference level for the contrast
-    contrast_target       = "$meta.contrast_targett",   # Target level for the contrast (e.g., "mCherry")
+    contrast_target       = "$meta.contrast_target",   # Target level for the contrast (e.g., "mCherry")
     blocking_factors   = "$meta.blocking_factors",  # Blocking variables (e.g., "sample_number")
     sample_id_col      = "sample",    # Column name for sample IDs
     threads            = "$task.cpus",              # Number of threads for multithreading
@@ -82,9 +82,10 @@ if (!is.null(opt\$blocking_factors) && tolower(opt\$blocking_factors) == "null")
 metadata <- read_delim_flexible(opt\$sample_file, header = TRUE, stringsAsFactors = TRUE)
 rownames(metadata) <- metadata[[opt\$sample_id_col]]
 
-# Relevel contrast variable in metadata if a reference is provided
+# Ensure contrast variable is factor, then relevel
 if (!is.null(opt\$contrast_reference) && opt\$contrast_reference != "") {
-  metadata[[opt\$contrast_variable]] <- relevel(metadata[[opt\$contrast_variable]], ref = opt\$contrast_reference)
+    metadata[[opt\$contrast_variable]] <- factor(metadata[[opt\$contrast_variable]])
+    metadata[[opt\$contrast_variable]] <- relevel(metadata[[opt\$contrast_variable]], ref = opt\$contrast_reference)
 }
 
 # Exclude samples in metadata if specified
@@ -94,8 +95,8 @@ if (!is.null(opt\$exclude_samples_col) && !is.null(opt\$exclude_samples_values))
 
 # Load count data
 countMatrix <- read_delim_flexible(opt\$count_file, header = TRUE, stringsAsFactors = FALSE)
-rownames(countMatrix) <- countMatrix\$gene_id
-countMatrix <- countMatrix[, -c(1,2)]  # Remove the first two non-numeric columns ("gene_id" and "gene_name")
+rownames(countMatrix) <- countMatrix\$gene_id # count_file/matrix must have a gene_id column.
+countMatrix <- countMatrix[, rownames(metadata), drop = FALSE]
 
 # Standard usage of limma/voom
 dge <- DGEList(countMatrix)
