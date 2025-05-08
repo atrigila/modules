@@ -42,11 +42,15 @@ input:
         type: file
         description: Fusion annotation library file containing known fusion genes
         required: true
-        ontologies:
-          - edam: "http://edamontology.org/topic_0203" # Gene fusion
   - - dfam_species:
         type: string
         description: Dfam species name
+  - - dfam_version:
+        type: string
+        description: Dfam version
+  - - pfam_version:
+        type: string
+        description: Pfam version
 output:
   - reference:
       - meta:
