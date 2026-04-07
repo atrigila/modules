@@ -1,0 +1,166 @@
+{
+    "homo_sapiens - cram": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_cram"
+                        },
+                        "test_cram.tsv:md5,8f0e355ad777f8391dcd576be12e71a4"
+                    ]
+                ],
+                "1": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_cram"
+                        },
+                        "test_cram.tsv:md5,8f0e355ad777f8391dcd576be12e71a4"
+                    ]
+                ],
+                "versions_gatk4": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T17:25:47.000857973",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "sarscov2 - vcf": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_vcf"
+                        },
+                        "test_vcf.tsv:md5,88f72ebfe1dec5ed4ef18d2f5841bc1f"
+                    ]
+                ],
+                "1": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_vcf"
+                        },
+                        "test_vcf.tsv:md5,88f72ebfe1dec5ed4ef18d2f5841bc1f"
+                    ]
+                ],
+                "versions_gatk4": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T17:23:58.645561191",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "test_stub.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "test_stub.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_gatk4": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T17:24:37.596457719",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "sarscov2 - bam": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_bam"
+                        },
+                        "test_bam.tsv:md5,c78e41dc2479708ede91963f014e4182"
+                    ]
+                ],
+                "1": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ],
+                "tsv": [
+                    [
+                        {
+                            "id": "test_bam"
+                        },
+                        "test_bam.tsv:md5,c78e41dc2479708ede91963f014e4182"
+                    ]
+                ],
+                "versions_gatk4": [
+                    [
+                        "GATK4_CHECKREFERENCECOMPATIBILITY",
+                        "gatk4",
+                        "4.6.2.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-04-07T17:25:33.436005694",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

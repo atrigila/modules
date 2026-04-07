@@ -1,0 +1,93 @@
+name: "gatk4_checkreferencecompatibility"
+description: Check compatibility between a genomic input sequence dictionary and a comparison reference
+keywords:
+  - gatk4
+  - reference
+  - compatibility
+  - bam
+  - cram
+  - vcf
+tools:
+  - "gatk4":
+      description: |
+        Developed in the Data Sciences Platform at the Broad Institute, the toolkit offers a wide variety of tools
+        with a primary focus on variant discovery and genotyping. Its powerful processing engine
+        and high-performance computing features make it capable of taking on projects of any size.
+      homepage: https://gatk.broadinstitute.org/hc/en-us
+      documentation: https://gatk.broadinstitute.org/hc/en-us/articles/21905063212187-CheckReferenceCompatibility-EXPERIMENTAL
+      doi: 10.1158/1538-7445.AM2017-3590
+      licence: ["Apache-2.0"]
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'test' ]`
+    - input:
+        type: file
+        description: Indexed BAM, CRAM, or VCF file to validate
+        pattern: "*.{bam,cram,vcf.gz}"
+        ontologies: []
+    - index:
+        type: file
+        description: Optional index for the BAM, CRAM, or VCF input file
+        pattern: "*.{bai,crai,tbi,csi}"
+        ontologies: []
+  - - meta2:
+        type: map
+        description: |
+          Groovy Map containing comparison reference information
+          e.g. `[ id:'refcomp' ]`
+    - reference_to_compare:
+        type: file
+        description: One or more reference FASTA files used with `--references-to-compare`
+        pattern: "*.{fasta,fa}"
+        ontologies: []
+    - reference_to_compare_fai:
+        type: file
+        description: FASTA index file(s) required for the comparison reference FASTA input(s)
+        pattern: "*.{fai}"
+        ontologies: []
+    - reference_to_compare_dict:
+        type: file
+        description: Sequence dictionary file(s) required for the comparison reference FASTA input(s)
+        pattern: "*.{dict}"
+        ontologies: []
+output:
+  tsv:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'test' ]`
+      - "*.tsv":
+          type: file
+          description: TSV report describing sequence-dictionary compatibility
+          pattern: "*.tsv"
+          ontologies: []
+  versions_gatk4:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - gatk4:
+          type: string
+          description: The name of the tool
+      - gatk --version | sed -n '/GATK.*v/s/.*v//p':
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - gatk4:
+          type: string
+          description: The name of the tool
+      - gatk --version | sed -n '/GATK.*v/s/.*v//p':
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@atrigila"
+maintainers:
+  - "@atrigila"
