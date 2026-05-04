@@ -63,6 +63,17 @@ nullify <- function(x) {
   if (is.character(x) && (tolower(x) == "null" || x == "")) NULL else x
 }
 
+#' Format numeric columns using significant digits
+#'
+#' @param df Input data frame.
+#' @param digits Number of significant digits.
+#' @return Data frame with numeric columns converted via sprintf formatting.
+format_numeric_columns <- function(df, digits) {
+  numeric_columns <- vapply(df, is.numeric, logical(1))
+  df[numeric_columns] <- lapply(df[numeric_columns], function(x) sprintf(paste0("%.", digits, "g"), x))
+  df
+}
+
 ################################################
 ################################################
 ## PARSE PARAMETERS FROM NEXTFLOW             ##
@@ -378,7 +389,7 @@ if (!is.null(opt\$block)) {
 if (!is.null(opt\$use_voom) && opt\$use_voom) {
     normalized_counts <- data_for_fit\$E
     if (! is.null(opt\$round_digits)){
-        normalized_counts <- apply(normalized_counts, 2, function(x) round(x, opt\$round_digits))
+        normalized_counts <- format_numeric_columns(data.frame(normalized_counts), opt\$round_digits)
     }
     normalized_counts_with_genes <- data.frame(Gene = rownames(normalized_counts), normalized_counts, check.names = FALSE, row.names = NULL)
     colnames(normalized_counts_with_genes)[1] <- opt\$probe_id_col
@@ -520,7 +531,7 @@ cat("Saving results for ", contrast.name, " ...\n", sep = "")
 # results
 
 if (! is.null(opt\$round_digits)){
-    comp.results <- apply(data.frame(comp.results), 2, function(x) round(x, opt\$round_digits))
+    comp.results <- format_numeric_columns(data.frame(comp.results), opt\$round_digits)
 }
 out_df <- cbind(
     setNames(data.frame(rownames(comp.results)), opt\$probe_id_col),

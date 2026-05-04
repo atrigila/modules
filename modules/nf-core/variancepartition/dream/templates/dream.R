@@ -70,6 +70,17 @@ nullify <- function(x) {
   if (is.character(x) && (tolower(x) == "null" || x == "")) NULL else x
 }
 
+#' Format numeric columns using significant digits
+#'
+#' @param df Input data frame.
+#' @param digits Number of significant digits.
+#' @return Data frame with numeric columns converted via sprintf formatting.
+format_numeric_columns <- function(df, digits) {
+  numeric_columns <- vapply(df, is.numeric, logical(1))
+  df[numeric_columns] <- lapply(df[numeric_columns], function(x) sprintf(paste0("%.", digits, "g"), x))
+  df
+}
+
 # Options list
 opt <- list(
     output_prefix              = ifelse('$task.ext.prefix' == 'null', '$meta.id', '$task.ext.prefix'),
@@ -256,9 +267,9 @@ if (as.logical(opt\$apply_voom)) {
     vobjDream <- voomWithDreamWeights(dge, form, metadata, BPPARAM = bp)
 
     # Write normalized counts matrix to a TSV file
-     normalized_counts <- vobjDream\$E
+    normalized_counts <- vobjDream\$E
     if (!is.null(opt\$round_digits)) {
-        normalized_counts <- apply(normalized_counts, 2, function(x) round(x, opt\$round_digits))
+        normalized_counts <- format_numeric_columns(data.frame(normalized_counts), opt\$round_digits)
     }
     normalized_counts_with_genes <- data.frame(gene_id = rownames(normalized_counts), normalized_counts, check.names = FALSE, row.names = NULL)
     write.table(normalized_counts_with_genes,
@@ -319,8 +330,7 @@ results <- results[, c("gene_id", setdiff(names(results), "gene_id"))]
 
 # Round results if required
 if (!is.null(opt\$round_digits)) {
-    numeric_columns <- vapply(results, is.numeric, logical(1))
-    results[numeric_columns] <- lapply(results[numeric_columns], round, digits = opt\$round_digits)
+    results <- format_numeric_columns(results, opt\$round_digits)
 }
 
 # Export topTable results

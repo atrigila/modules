@@ -79,6 +79,17 @@ nullify <- function(x) {
   if (is.character(x) && (tolower(x) == "null" || x == "")) NULL else x
 }
 
+#' Format numeric columns using significant digits
+#'
+#' @param df Input data frame.
+#' @param digits Number of significant digits.
+#' @return Data frame with numeric columns converted via sprintf formatting.
+format_numeric_columns <- function(df, digits) {
+  numeric_columns <- vapply(df, is.numeric, logical(1))
+  df[numeric_columns] <- lapply(df[numeric_columns], function(x) sprintf(paste0("%.", digits, "g"), x))
+  df
+}
+
 #' Run DESeq2 differential expression results with shared settings
 #'
 #' A thin wrapper around DESeq2::results() that injects the common parameters
@@ -480,7 +491,7 @@ cat("Saving results for ", opt\$contrast_string, " ...\n", sep = "")
 # results
 
 if (! is.null(opt\$round_digits)){
-  comp.results <- apply(data.frame(comp.results), 2, function(x) round(x, opt\$round_digits))
+  comp.results <- format_numeric_columns(data.frame(comp.results), opt\$round_digits)
 }
 comp.results <- `colnames<-`(
   data.frame(
@@ -541,7 +552,7 @@ write.table(
 
 normalised_matrix <- counts(dds, normalized = TRUE)
 if (! is.null(opt\$round_digits)){
-  normalised_matrix <- apply(normalised_matrix, 2, function(x) round(x, opt\$round_digits))
+  normalised_matrix <- format_numeric_columns(data.frame(normalised_matrix), opt\$round_digits)
 }
 normalised_matrix <- `colnames<-`(
   data.frame(
@@ -571,7 +582,7 @@ for (vs_method_name in strsplit(opt\$vs_method, ',')){
   }
 
   if (! is.null(opt\$round_digits)){
-    vs_mat <- apply(vs_mat, 2, function(x) round(x, opt\$round_digits))
+    vs_mat <- format_numeric_columns(data.frame(vs_mat), opt\$round_digits)
   }
 
   vs_mat <- `colnames<-`(
