@@ -9,9 +9,15 @@ nextflow_process {
     tag "fgumi"
     tag "fgumi/extract"
 
+    config "./nextflow.config"
+
     test("homo_sapiens - [fastq1, fastq2]") {
 
         when {
+            params {
+                module_args = '--library test'
+                prefix = ''
+            }
             process {
                 """
                 input[0] = [
@@ -27,10 +33,39 @@ nextflow_process {
 
         then {
             assertAll(
-                { assert snapshot(process.out).match() }
+                { assert process.success },
+                { assert snapshot(sanitizeOutput(process.out)).match() }
             )
         }
 
+    }
+
+    test("homo_sapiens - [fastq1, fastq2] - missing library") {
+
+        when {
+            params {
+                module_args = '--read-structures +T +M'
+                prefix = ''
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    [
+                        file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/fastq/test.umi_1.fastq.gz', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/homo_sapiens/illumina/fastq/test.umi_2.fastq.gz', checkIfExists: true)
+                    ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert !process.success },
+                { assert process.errorReport.contains('fgumi extract requires both --sample and --library') }
+            )
+            }
     }
 
     test("homo_sapiens - [fastq1, fastq2] - stub") {
@@ -38,6 +73,10 @@ nextflow_process {
         options "-stub"
 
         when {
+            params {
+                module_args = "--sample test --library test --read-structures +T +M"
+                prefix = ''
+            }
             process {
                 """
                 input[0] = [
@@ -53,7 +92,8 @@ nextflow_process {
 
         then {
             assertAll(
-                { assert snapshot(process.out).match() }
+                { assert process.success },
+                { assert snapshot(sanitizeOutput(process.out)).match() }
             )
         }
 

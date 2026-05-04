@@ -2,21 +2,6 @@
     "homo_sapiens - [fastq1, fastq2]": {
         "content": [
             {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.bam:md5,0b06fac2943d2128fbb391f7da0948e3"
-                    ]
-                ],
-                "1": [
-                    [
-                        "FGUMI_EXTRACT",
-                        "fgumi",
-                        "0.2.0"
-                    ]
-                ],
                 "bam": [
                     [
                         {
@@ -34,7 +19,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-04-29T20:16:44.87275989",
+        "timestamp": "2026-05-04T22:22:16.912892888",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
@@ -43,21 +28,6 @@
     "homo_sapiens - [fastq1, fastq2] - stub": {
         "content": [
             {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.bam:md5,d41d8cd98f00b204e9800998ecf8427e"
-                    ]
-                ],
-                "1": [
-                    [
-                        "FGUMI_EXTRACT",
-                        "fgumi",
-                        "0.2.0"
-                    ]
-                ],
                 "bam": [
                     [
                         {
@@ -75,7 +45,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-04-29T19:49:25.098129043",
+        "timestamp": "2026-05-04T22:10:38.368295554",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

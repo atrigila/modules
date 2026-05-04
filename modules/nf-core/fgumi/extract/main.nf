@@ -1,6 +1,6 @@
 process FGUMI_EXTRACT {
     tag "${meta.id}"
-    label 'process_low'
+    label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
@@ -19,21 +19,20 @@ process FGUMI_EXTRACT {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: meta.id
-    def sample = args.contains('--sample') ? '' : "--sample ${meta.id}"
-    def library = args.contains('--library') ? '' : "--library ${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    if (!args.contains('--sample') || !args.contains('--library')) {
+        error("fgumi extract requires both --sample and --library to be supplied via task.ext.args")
+    }
 
     """
     fgumi extract \\
         --inputs ${reads.join(' ')} \\
         --output ${prefix}.bam \\
-        ${sample} \\
-        ${library} \\
         ${args}
     """
 
     stub:
-    def prefix = task.ext.prefix ?: meta.id
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.bam
     """
