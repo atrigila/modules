@@ -7,7 +7,7 @@
                         {
                             "id": "test"
                         },
-                        "test.bam:md5,0b06fac2943d2128fbb391f7da0948e3"
+                        "test.bam:md5,9c2476e5c354f57bed109e582b8953be"
                     ]
                 ],
                 "versions_fgumi": [
@@ -19,7 +19,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-05-04T22:22:16.912892888",
+        "timestamp": "2026-05-05T17:49:43.490283983",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
