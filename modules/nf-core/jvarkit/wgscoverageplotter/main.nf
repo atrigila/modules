@@ -14,7 +14,7 @@ process JVARKIT_WGSCOVERAGEPLOTTER {
     tuple val(meta4), path(dict)
     output:
     tuple val(meta),  path("*.svg"), emit: output
-    path "versions.yml"            , emit: versions
+    tuple val("${task.process}"), val('jvarkit'), eval('jvarkit -v'), emit: versions_jvarkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,10 +32,6 @@ process JVARKIT_WGSCOVERAGEPLOTTER {
 
     rm -rf TMP
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 
     stub:
@@ -43,9 +39,5 @@ process JVARKIT_WGSCOVERAGEPLOTTER {
     """
     touch "${prefix}.svg"
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 }

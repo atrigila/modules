@@ -19,13 +19,13 @@ process JVARKIT_VCFFILTERJDK {
     tuple val(meta), path("*.${extension}"), emit: vcf
     tuple val(meta), path("*.tbi")         , emit: tbi, optional: true
     tuple val(meta), path("*.csi")         , emit: csi, optional: true
-    path "versions.yml"                    , emit: versions
+    tuple val("${task.process}"), val('jvarkit'), eval('jvarkit -v'), emit: versions_jvarkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args1         = task.ext.args1 ?: ''
+    def args         = task.ext.args ?: ''
     def args2         = task.ext.args2 ?: ''
     def args3         = task.ext.args3 ?: ''
     def prefix        = task.ext.prefix ?: "${meta.id}"
@@ -42,7 +42,7 @@ process JVARKIT_VCFFILTERJDK {
     bcftools view \\
         -O v \\
         ${regions_cmd} \\
-        ${args1} \\
+        ${args} \\
         "${vcf}" |\\
         jvarkit -Xmx${task.memory.giga}g -XX:-UsePerfData -Djava.io.tmpdir=TMP vcffilterjdk \\
             ${pedigree_file} \\
@@ -54,11 +54,6 @@ process JVARKIT_VCFFILTERJDK {
 
     rm -rf TMP
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 
     stub:
@@ -68,11 +63,6 @@ process JVARKIT_VCFFILTERJDK {
     """
     touch "${prefix}.${extension}"
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 }
 

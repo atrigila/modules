@@ -12,13 +12,13 @@ process JVARKIT_VCF2TABLE {
     tuple val(meta2), path(pedigree)
     output:
     tuple val(meta), path("*.${extension}"), emit: output
-    path "versions.yml"                    , emit: versions
+    tuple val("${task.process}"), val('jvarkit'), eval('jvarkit -v'), emit: versions_jvarkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args1        = task.ext.args1 ?: ''
+    def args        = task.ext.args ?: ''
     def args2        = task.ext.args2 ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}"
     def ped          = pedigree?"--pedigree \"${pedigree}\"":""
@@ -29,16 +29,11 @@ process JVARKIT_VCF2TABLE {
     """
     mkdir -p TMP
 
-    bcftools view ${regions_opt} -O v ${args1} "${vcf}" |\\
+    bcftools view ${regions_opt} -O v ${args} "${vcf}" |\\
         jvarkit -Xmx${task.memory.giga}g  -XX:-UsePerfData -Djava.io.tmpdir=TMP vcf2table ${ped}  ${args2} > "${prefix}.${extension}"
 
     rm -rf TMP
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 
     stub:
@@ -48,11 +43,6 @@ process JVARKIT_VCF2TABLE {
     """
     touch "${prefix}.${extension}"
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 }
 

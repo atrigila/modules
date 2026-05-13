@@ -13,7 +13,7 @@ process JVARKIT_SAM2TSV {
 
     output:
     tuple val(meta), path("*.tsv"), emit: tsv
-    path "versions.yml"           , emit: versions
+    tuple val("${task.process}"), val('jvarkit'), eval('jvarkit -v'), emit: versions_jvarkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,10 +34,6 @@ process JVARKIT_SAM2TSV {
         "${bam}"
     rm -rf TMP
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 
     stub:
@@ -45,9 +41,5 @@ process JVARKIT_SAM2TSV {
     """
     touch "${prefix}.tsv"
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 }

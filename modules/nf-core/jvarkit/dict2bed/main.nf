@@ -12,7 +12,7 @@ process JVARKIT_DICT2BED {
 
     output:
     tuple val(meta), path("*.bed"), emit: bed
-    path "versions.yml"           , emit: versions
+    tuple val("${task.process}"), val('jvarkit'), eval('jvarkit -v'), emit: versions_jvarkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,10 +28,6 @@ process JVARKIT_DICT2BED {
 
     rm -rf TMP
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 
     stub:
@@ -39,9 +35,5 @@ process JVARKIT_DICT2BED {
     """
     touch "${prefix}.bed"
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        jvarkit: \$(jvarkit -v)
-    END_VERSIONS
     """
 }
