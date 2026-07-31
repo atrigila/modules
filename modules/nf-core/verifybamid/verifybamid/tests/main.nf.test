@@ -29,14 +29,7 @@ nextflow_process {
         then {
             assertAll(
                 { assert process.success },
-                { assert snapshot(
-                    file(process.out.log[0][1]).name,
-                    process.out.depthrg,
-                    process.out.depthsm,
-                    process.out.selfrg,
-                    process.out.selfsm,
-                    process.out.versions,
-                    ).match() }
+                { assert snapshot(sanitizeOutput(process.out, unstableKeys: ['log'])).match() }
             )
         }
     }

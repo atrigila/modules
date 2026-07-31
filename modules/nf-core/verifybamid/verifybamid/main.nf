@@ -19,7 +19,7 @@ process VERIFYBAMID_VERIFYBAMID {
     tuple val(meta), path("*.depthRG")               , optional:true, emit: depthrg
     tuple val(meta), path("*.bestSM")                , optional:true, emit: bestsm
     tuple val(meta), path("*.bestRG")                , optional:true, emit: bestrg
-    path "versions.yml"                                             , emit: versions
+    tuple val("${task.process}"), val('verifybamid'), val("1.1.3"), emit: versions_verifybamid, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,10 +35,5 @@ process VERIFYBAMID_VERIFYBAMID {
         --out ${prefix} \\
         ${args} \\
         > ${prefix}.log
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        verifybamid: $VERSION
-    END_VERSIONS
     """
 }
