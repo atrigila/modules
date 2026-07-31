@@ -116,13 +116,27 @@ output:
           ontologies:
             - edam: "http://edamontology.org/format_3016" # VCF
             - edam: http://edamontology.org/format_3989 # GZIP format
+  versions_varscan:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - varscan:
+          type: string
+          description: The name of the tool
+      - 'varscan 2>&1 | grep VarScan | head -n 1 | sed "s/VarScan //g" | sed "s/,.*//g" | sed "s/^v//" | sed "s/_.*//"':
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: "versions.yml"
-        ontologies:
-          - edam: http://edamontology.org/format_3750 # YAML
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - varscan:
+          type: string
+          description: The name of the tool
+      - 'varscan 2>&1 | grep VarScan | head -n 1 | sed "s/VarScan //g" | sed "s/,.*//g" | sed "s/^v//" | sed "s/_.*//"':
+          type: eval
+          description: The expression to obtain the version of the tool
 authors:
   - "@vmelichar"
 maintainers:
