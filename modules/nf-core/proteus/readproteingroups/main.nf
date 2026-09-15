@@ -11,15 +11,15 @@ process PROTEUS_READPROTEINGROUPS {
     tuple val(meta), path(samplesheet), path(intensities)
 
     output:
-    tuple val(meta), path("*dendrogram.png")                    , emit: dendro_plot
-    tuple val(meta), path("*mean_variance_relationship.png")    , emit: mean_var_plot
-    tuple val(meta), path("*raw_distributions.png")             , emit: raw_dist_plot
-    tuple val(meta), path("*normalized_distributions.png")      , emit: norm_dist_plot
-    tuple val(meta), path("*raw_proteingroups.rds")             , emit: raw_rdata
-    tuple val(meta), path("*normalized_proteingroups.rds")      , emit: norm_rdata
-    tuple val(meta), path("*raw_proteingroups_tab.tsv")         , emit: raw_tab
-    tuple val(meta), path("*normalized_proteingroups_tab.tsv")  , emit: norm_tab
-    tuple val(meta), path("*R_sessionInfo.log")                 , emit: session_info
+    tuple val(meta), path("*dendrogram.{png,pdf}")                 , emit: dendro_plot
+    tuple val(meta), path("*mean_variance_relationship.{png,pdf}") , emit: mean_var_plot
+    tuple val(meta), path("*raw_distributions.{png,pdf}")          , emit: raw_dist_plot
+    tuple val(meta), path("*normalized_distributions.{png,pdf}")   , emit: norm_dist_plot
+    tuple val(meta), path("*raw_proteingroups.rds")                , emit: raw_rdata
+    tuple val(meta), path("*normalized_proteingroups.rds")         , emit: norm_rdata
+    tuple val(meta), path("*raw_proteingroups_tab.tsv")            , emit: raw_tab
+    tuple val(meta), path("*normalized_proteingroups_tab.tsv")     , emit: norm_tab
+    tuple val(meta), path("*R_sessionInfo.log")                    , emit: session_info
     path "versions.yml"                                         , emit: versions, topic: versions
 
     when:
@@ -32,9 +32,13 @@ process PROTEUS_READPROTEINGROUPS {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}_dendrogram.png
+    touch ${prefix}_dendrogram.pdf
     touch ${prefix}_mean_variance_relationship.png
+    touch ${prefix}_mean_variance_relationship.pdf
     touch ${prefix}_raw_distributions.png
+    touch ${prefix}_raw_distributions.pdf
     touch ${prefix}_normalized_distributions.png
+    touch ${prefix}_normalized_distributions.pdf
     touch ${prefix}_raw_proteingroups.rds
     touch ${prefix}_normalized_proteingroups.rds
     touch ${prefix}_raw_proteingroups_tab.tsv

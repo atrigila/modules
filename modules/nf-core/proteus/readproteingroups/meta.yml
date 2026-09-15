@@ -32,47 +32,39 @@ input:
 output:
   dendro_plot:
     - - meta:
+          type: map
+          description: Groovy Map containing sample information, same as input meta
+      - "*dendrogram.{png,pdf}":
           type: file
           description: |
-            PNG file; dendrogram of the normalized samples hierarchically clustered by their intensities
-          ontologies: []
-      - "*dendrogram.png":
-          type: file
-          description: |
-            PNG file; dendrogram of the normalized samples hierarchically clustered by their intensities
+            PNG and PDF files; dendrogram of the normalised samples hierarchically clustered by their intensities
           ontologies: []
   mean_var_plot:
     - - meta:
+          type: map
+          description: Groovy Map containing sample information, same as input meta
+      - "*mean_variance_relationship.{png,pdf}":
           type: file
           description: |
-            PNG file; dendrogram of the normalized samples hierarchically clustered by their intensities
-          ontologies: []
-      - "*mean_variance_relationship.png":
-          type: file
-          description: |
-            PNG file; plot of the log-intensity variance vs log-intensity mean of each condition in the normalized samples
+            PNG and PDF files; plot of the log-intensity variance vs log-intensity mean of each condition in the normalised samples
           ontologies: []
   raw_dist_plot:
     - - meta:
+          type: map
+          description: Groovy Map containing sample information, same as input meta
+      - "*raw_distributions.{png,pdf}":
           type: file
           description: |
-            PNG file; dendrogram of the normalized samples hierarchically clustered by their intensities
-          ontologies: []
-      - "*raw_distributions.png":
-          type: file
-          description: |
-            PNG file; plot of the intensity/ratio distributions of the raw samples
+            PNG and PDF files; plot of the intensity/ratio distributions of the raw samples
           ontologies: []
   norm_dist_plot:
     - - meta:
+          type: map
+          description: Groovy Map containing sample information, same as input meta
+      - "*normalized_distributions.{png,pdf}":
           type: file
           description: |
-            PNG file; dendrogram of the normalized samples hierarchically clustered by their intensities
-          ontologies: []
-      - "*normalized_distributions.png":
-          type: file
-          description: |
-            PNG file; plot of the intensity/ratio distributions of the normalized samples
+            PNG and PDF files; plot of the intensity/ratio distributions of the normalised samples
           ontologies: []
   raw_rdata:
     - - meta:

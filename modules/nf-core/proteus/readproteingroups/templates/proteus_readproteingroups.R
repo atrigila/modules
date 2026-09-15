@@ -276,6 +276,14 @@ print(
     )
 dev.off()
 
+pdf(paste(opt\$norm_function, 'normalized_distributions.pdf', sep='.'), width = 5, height = 5, pointsize = 8)
+print(
+    plotSampleDistributions(proteinGroups.normalized, title=paste0("Sample distributions after applying\n", opt\$norm_function, " in contrast ", opt\$contrast_variable), fill="condition", method=opt\$plotsd_method)
+        + scale_fill_brewer(palette=opt\$palette_name, name=opt\$contrast_variable)
+        + theme(plot.title = element_text(size = 12))
+    )
+dev.off()
+
 png(paste(opt\$norm_function, 'normalized_mean_variance_relationship.png', sep='.'), width = 5*300, height = 5*300, res = 300, pointsize = 8)
 print(
     plotMV(proteinGroups.normalized, with.loess=opt\$plotmv_loess)
@@ -285,7 +293,24 @@ print(
     )
 dev.off()
 
+pdf(paste(opt\$norm_function, 'normalized_mean_variance_relationship.pdf', sep='.'), width = 5, height = 5, pointsize = 8)
+print(
+    plotMV(proteinGroups.normalized, with.loess=opt\$plotmv_loess)
+        + ggtitle(paste0("Sample mean variance relationship after applying\n", opt\$norm_function, " in contrast ", opt\$contrast_variable))
+        + scale_fill_distiller(palette=opt\$palette_name)
+        + theme(plot.title = element_text(size = 12))
+    )
+dev.off()
+
 png(paste(opt\$norm_function, 'normalized_dendrogram.png', sep='.'), width = 5*300, height = 5*300, res = 300, pointsize = 8)
+print(
+    plotClustering(proteinGroups.normalized)
+        + ggtitle(paste0("Sample clustering after applying\n", opt\$norm_function, " in contrast ", opt\$contrast_variable))
+        + theme(plot.title = element_text(size = 12))
+    )
+dev.off()
+
+pdf(paste(opt\$norm_function, 'normalized_dendrogram.pdf', sep='.'), width = 5, height = 5, pointsize = 8)
 print(
     plotClustering(proteinGroups.normalized)
         + ggtitle(paste0("Sample clustering after applying\n", opt\$norm_function, " in contrast ", opt\$contrast_variable))
@@ -321,6 +346,14 @@ proteinGroups\$tab <- log2(proteinGroups\$tab)
 # Generate raw distribution plot
 
 png('raw_distributions.png', width = 5*300, height = 5*300, res = 300, pointsize = 8)
+print(
+    plotSampleDistributions(proteinGroups, title=paste("Raw sample distributions in contrast", opt\$contrast_variable), fill="condition", method=opt\$plotsd_method)
+        + scale_fill_brewer(palette=opt\$palette_name, name=opt\$contrast_variable)
+        + theme(plot.title = element_text(size = 12))
+    )
+dev.off()
+
+pdf('raw_distributions.pdf', width = 5, height = 5, pointsize = 8)
 print(
     plotSampleDistributions(proteinGroups, title=paste("Raw sample distributions in contrast", opt\$contrast_variable), fill="condition", method=opt\$plotsd_method)
         + scale_fill_brewer(palette=opt\$palette_name, name=opt\$contrast_variable)

@@ -30,18 +30,13 @@ nextflow_process {
         then {
             assertAll (
                 { assert process.success },
-                { assert snapshot(
-                    file(process.out.dendro_plot[0][1]).name,
-                    file(process.out.mean_var_plot[0][1]).name,
-                    file(process.out.raw_dist_plot[0][1]).name,
-                    file(process.out.norm_dist_plot[0][1]).name,
-                    file(process.out.raw_rdata[0][1]).name,
-                    file(process.out.norm_rdata[0][1]).name,
-                    process.out.raw_tab,
-                    process.out.norm_tab,
-                    file(process.out.session_info[0][1]).name,
-                    process.out.versions,
-                ).match() }
+                { assert snapshot(sanitizeOutput(process.out, unstableKeys: [
+                    'dendro_plot',
+                    'mean_var_plot',
+                    'raw_dist_plot',
+                    'norm_dist_plot',
+                    'raw_rdata', 'norm_rdata', 'session_info'
+                ])).match() }
             )
         }
     }
@@ -68,18 +63,13 @@ nextflow_process {
         then {
             assertAll (
                 { assert process.success },
-                { assert snapshot(
-                    file(process.out.dendro_plot[0][1]).name,
-                    file(process.out.mean_var_plot[0][1]).name,
-                    file(process.out.raw_dist_plot[0][1]).name,
-                    file(process.out.norm_dist_plot[0][1]).name,
-                    file(process.out.raw_rdata[0][1]).name,
-                    file(process.out.norm_rdata[0][1]).name,
-                    process.out.raw_tab,
-                    process.out.norm_tab,
-                    file(process.out.session_info[0][1]).name,
-                    process.out.versions,
-                ).match() }
+                { assert snapshot(sanitizeOutput(process.out, unstableKeys: [
+                    'dendro_plot',
+                    'mean_var_plot',
+                    'raw_dist_plot',
+                    'norm_dist_plot',
+                    'raw_rdata', 'norm_rdata', 'session_info'
+                ])).match() }
             )
         }
     }
