@@ -1,0 +1,173 @@
+{
+    "transcript fasta and txp2gene": {
+        "content": [
+            {
+                "index": [
+                    [
+                        {
+                            "id": "transcriptome"
+                        },
+                        [
+                            "piscem_idx.ctab:md5,cdb2a0685acd4b66fc3fac625953bae8",
+                            "piscem_idx.ectab:md5,e6aaf94be868e476c68eb060fb8b6042",
+                            "piscem_idx.refinfo:md5,63c5062b8d704e46b8b5ab59e080d9ed",
+                            "piscem_idx.sigs.json:md5,50db2b20eeca50f21b0270c3135eda92",
+                            "piscem_idx.ssi:md5,657ef57eec0217c442717985de61f436",
+                            "piscem_idx.ssi.mphf:md5,4f7ab91bfc4ceff65dd057d3d59897c3",
+                            "piscem_idx.tct:md5,a260d06640b96686c97dff96ddb2d714",
+                            "piscem_idx.tdct:md5,db5a049c8860f5d576671224a31c5d77",
+                            "piscem_idx_cfish.json:md5,f3e2d60eb9944cbaa973c5b214cae6bf",
+                            "piscem_idx_ver.json:md5,07d40f690ed21895051b7bdfd93360ec",
+                            "simpleaf_index.json:md5,0e1d9ef3bf6074221e6090e68c857f88"
+                        ]
+                    ]
+                ],
+                "map": [
+                    
+                ],
+                "qcatch_report": [
+                    
+                ],
+                "quant": [
+                    
+                ],
+                "txp2gene": [
+                    
+                ]
+            }
+        ],
+        "timestamp": "2026-09-18T18:10:52.84561853",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "existing simpleaf index": {
+        "content": [
+            {
+                "index": [
+                    [
+                        {
+                            "id": "setup"
+                        },
+                        [
+                            "gene_id_to_name.tsv:md5,78904ef0e52f896a6e19989eaccd7d5f",
+                            "piscem_idx.ctab:md5,10a860194dfb45701170a7ebfc0f99a5",
+                            "piscem_idx.ectab:md5,901abe8cb6bd143e952868a23c538a5c",
+                            "piscem_idx.refinfo:md5,381e248efd43d214b66a5a43099c90e0",
+                            "piscem_idx.sigs.json:md5,1545a809adbe0527808af448fe2d2ae5",
+                            "piscem_idx.ssi:md5,50868a2f3aa2be338db02e4fc3a93578",
+                            "piscem_idx.ssi.mphf:md5,4a98a0f821d49dc9b69c2a65ec0c9899",
+                            "piscem_idx.tct:md5,35b5a1de661faa6abb6c3e0976e5fa4f",
+                            "piscem_idx.tdct:md5,803f1f04af1978de8fd3ba88b1ca8e96",
+                            "piscem_idx_cfish.json:md5,f306aa6de4c54b260669c7f63de57feb",
+                            "piscem_idx_ver.json:md5,07d40f690ed21895051b7bdfd93360ec",
+                            "simpleaf_index.json:md5,0590ab8254b2bd81de893a5253505bf4",
+                            "t2g_3col.tsv:md5,7ebbf87b644e8d76cdf1c3c5b23adaca"
+                        ]
+                    ]
+                ],
+                "map": [
+                    
+                ],
+                "qcatch_report": [
+                    
+                ],
+                "quant": [
+                    
+                ],
+                "txp2gene": [
+                    
+                ]
+            }
+        ],
+        "timestamp": "2026-09-18T18:10:38.195581962",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "genome fasta and gtf": {
+        "content": [
+            {
+                "index": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "gene_id_to_name.tsv:md5,78904ef0e52f896a6e19989eaccd7d5f",
+                            "piscem_idx.ctab:md5,188d9109537a4ea1b0282b0c1c0c2676",
+                            "piscem_idx.ectab:md5,6ad6ef35a6ccaa50baa55ec0e8e1ae22",
+                            "piscem_idx.refinfo:md5,edad1a461b6d022efd3a7e9c4d8ab7d0",
+                            "piscem_idx.sigs.json:md5,1545a809adbe0527808af448fe2d2ae5",
+                            "piscem_idx.ssi:md5,e7ff39947afda412484dd17fc6a06eca",
+                            "piscem_idx.ssi.mphf:md5,4a98a0f821d49dc9b69c2a65ec0c9899",
+                            "piscem_idx.tct:md5,cc3624a1c8ab04eefb8d1ad9a842e02d",
+                            "piscem_idx.tdct:md5,81f289de5285f67a9aa8a41ef329e136",
+                            "piscem_idx_cfish.json:md5,233c9ce97ec51ca2d7bbac71cc18e9a4",
+                            "piscem_idx_ver.json:md5,07d40f690ed21895051b7bdfd93360ec",
+                            "simpleaf_index.json:md5,961f1c69af8241a1cbbf79866092001e",
+                            "t2g_3col.tsv:md5,7ebbf87b644e8d76cdf1c3c5b23adaca"
+                        ]
+                    ]
+                ],
+                "map": [
+                    [
+                        {
+                            "chemistry": "10xv3",
+                            "filtered": true,
+                            "id": "test"
+                        },
+                        [
+                            "map.rad:md5,123f359065180ce704b4627c3350e62c",
+                            "map_info.json:md5,1c41711b945d0d9d779ed136d601313b",
+                            "unmapped_bc_count.bin:md5,5f018da798a3bfe79c2d59898dea9a7a"
+                        ]
+                    ]
+                ],
+                "qcatch_report": [
+                    
+                ],
+                "quant": [
+                    [
+                        {
+                            "chemistry": "10xv3",
+                            "filtered": true,
+                            "id": "test"
+                        },
+                        [
+                            [
+                                "quants.h5ad:md5,0d261580e502439e22f8f16e3ddd1d2e",
+                                "quants_mat.mtx:md5,9cecaf489b3e2764608704e61a77bc22",
+                                "quants_mat_cols.txt:md5,7e679bae4455767c14a0a76e17674937",
+                                "quants_mat_rows.txt:md5,b400c613494b919928f2d4e2e0ceb4bf"
+                            ],
+                            "all_freq.bin:md5,94410f2a0006ef0a7cff9d5f00caecc6",
+                            "collate.json:md5,c03912762a3ffa6ebbfeb480089218b5",
+                            "correction_plan.bin:md5,2e1e98f4538e64f703b2696f2c8871e8",
+                            "featureDump.txt:md5,c7fe81701ec2cbacc592934b2c75031e",
+                            "gene_id_to_name.tsv:md5,78904ef0e52f896a6e19989eaccd7d5f",
+                            "generate_permit_list.json:md5,8c4357f013c2698f299cf61c42a88968",
+                            "map.collated.rad:md5,cf76e09bf1cc2f13bb3e8bd713a1294a",
+                            "map.collated.rad.chunkidx:md5,26beb70cbfaab74499fbed18fd4f7361",
+                            "permit_freq.bin:md5,1462607b69c0b6a685de9dfed4164380",
+                            "permit_map.bin:md5,181ec06561a2fe789cbb0a3dab4b4bb2",
+                            "quant.json:md5,010c2a9e2338a0489c5bf5551267f133",
+                            "simpleaf_map_info.json:md5,03c84757e1b7fdde858240707c0c2ee9",
+                            "unmapped_bc_count_collated.bin:md5,a5e86e539907ad820cbf4e1e2d527abf"
+                        ]
+                    ]
+                ],
+                "txp2gene": [
+                    "t2g_3col.tsv:md5,7ebbf87b644e8d76cdf1c3c5b23adaca"
+                ]
+            }
+        ],
+        "timestamp": "2026-09-18T18:10:31.222452362",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

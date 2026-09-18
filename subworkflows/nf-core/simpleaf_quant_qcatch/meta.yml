@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "simpleaf_quant_qcatch"
+description: Perform single-cell RNA sequencing quantification with SimpleAF and optional QCatch quality control
+keywords:
+  - scrnaseq
+  - simpleaf
+  - alevin-fry
+  - qcatch
+  - quantification
+components:
+  - simpleaf/index
+  - simpleaf/quant
+  - qcatch
+input:
+  - ch_genome_fasta:
+      type: file
+      description: |
+        Structure: [ val(meta), path(genome_fasta) ]
+        Required with ch_genome_gtf unless transcript_fasta, simpleaf_index, or map_dir is supplied
+  - ch_genome_gtf:
+      type: file
+      description: |
+        Structure: [ val(meta), path(genome_gtf) ]
+        Required with ch_genome_fasta unless transcript_fasta, simpleaf_index, or map_dir is supplied
+  - transcript_fasta:
+      type: file
+      description: |
+        Structure: [ path(transcript_fasta) ]
+        Optional alternative to the genome FASTA/GTF pair; requires txp2gene
+  - simpleaf_index:
+      type: directory
+      description: |
+        Structure: [ path(simpleaf_index) ]
+        Optional; skips index construction
+  - txp2gene:
+      type: file
+      description: |
+        Structure: [ path(txp2gene) ]
+        Optional unless transcript_fasta is supplied
+  - barcode_whitelist:
+      type: file
+      description: |
+        Structure: [ path(barcode_whitelist) ]
+        Optional barcode whitelist for unfiltered permit-list generation
+  - chemistry:
+      type: string
+      description: |
+        Structure: [ val(chemistry) ]
+        Required when ch_fastq is supplied
+  - qcatch_chemistry:
+      type: string
+      description: |
+        Structure: [ val(qcatch_chemistry) ]
+        Optional; null enables QCatch chemistry inference
+  - skip_qcatch:
+      type: boolean
+      description: |
+        Structure: [ val(skip_qcatch) ]
+        Required boolean controlling QCatch execution
+  - resolution:
+      type: string
+      description: |
+        Structure: [ val(resolution) ]
+        Required SimpleAF UMI resolution
+  - ch_fastq:
+      type: file
+      description: |
+        Structure: [ val(meta), [ path(fastq) ] ]
+        Optional; required unless map_dir is supplied
+  - map_dir:
+      type: directory
+      description: |
+        Structure: [ path(map_dir) ]
+        Optional; skips index construction and read mapping
+output:
+  - txp2gene:
+      type: file
+      description: |
+        Structure: [ val(meta), path(txp2gene) ]
+      pattern: "*/ref/{t2g,t2g_3col}.tsv"
+  - index:
+      type: directory
+      description: |
+        Structure: [ val(meta), path(index) ]
+      pattern: "*/index/*"
+  - map:
+      type: directory
+      description: |
+        Structure: [ val(meta), path(map) ]
+      pattern: "*/af_map/*"
+  - quant:
+      type: directory
+      description: |
+        Structure: [ val(meta), path(quant) ]
+      pattern: "*/af_quant/**/*"
+  - qcatch_report:
+      type: file
+      description: |
+        Structure: [ val(meta), path(qcatch_report) ]
+      pattern: "*_qcatch_report.html"
+authors:
+  - "@fmalmeida"

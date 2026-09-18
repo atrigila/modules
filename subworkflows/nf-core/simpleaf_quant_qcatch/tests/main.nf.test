@@ -1,0 +1,162 @@
+nextflow_workflow {
+    name "Test Subworkflow SIMPLEAF_QUANT_QCATCH"
+    script "../main.nf"
+    workflow "SIMPLEAF_QUANT_QCATCH"
+
+    tag "subworkflows"
+    tag "subworkflows_nfcore"
+    tag "subworkflows/simpleaf_quant_qcatch"
+    tag "simpleaf/index"
+    tag "simpleaf/quant"
+    tag "qcatch"
+
+    test("genome fasta and gtf") {
+        when {
+            workflow {
+                """
+                input[0] = channel.of([[id: 'test'], file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true)])
+                input[1] = channel.of([[id: 'test'], file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.gtf', checkIfExists: true)])
+                input[2] = null
+                input[3] = null
+                input[4] = null
+                input[5] = null
+                input[6] = '10xv3'
+                input[7] = '10X_3p_v3'
+                input[8] = true
+                input[9] = 'cr-like'
+                input[10] = channel.of([[id: 'test'], [file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R1_001.fastq.gz', checkIfExists: true), file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R2_001.fastq.gz', checkIfExists: true)]])
+                input[11] = null
+                """
+            }        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(sanitizeOutput(workflow.out)).match() }
+            )
+        }
+    }
+
+    test("existing simpleaf index") {
+        setup {
+            run("SIMPLEAF_INDEX") {
+                script "../../../../modules/nf-core/simpleaf/index/main.nf"
+                process {
+                    """
+                    input[0] = channel.of([[id: 'setup'], file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true), file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.gtf', checkIfExists: true)])
+                    input[1] = channel.of([[:], []])
+                    input[2] = channel.of([[:], []])
+                    input[3] = channel.of([[:], []])
+                    """
+                }
+            }
+        }
+        when {
+            workflow { """
+                input[0] = null
+                input[1] = null
+                input[2] = null
+                input[3] = SIMPLEAF_INDEX.out.index
+                input[4] = null
+                input[5] = null
+                input[6] = '10xv3'
+                input[7] = null
+                input[8] = true
+                input[9] = 'cr-like'
+                input[10] = channel.of([[id: 'test'], [file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R1_001.fastq.gz', checkIfExists: true), file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R2_001.fastq.gz', checkIfExists: true)]])
+                input[11] = null
+                """ }
+        }
+        then {
+            assert workflow.success
+            assert snapshot(sanitizeOutput(workflow.out)).match()
+        }
+    }
+
+    test("existing map directory") {
+        setup {
+            run("SIMPLEAF_INDEX") {
+                script "../../../../modules/nf-core/simpleaf/index/main.nf"
+                process {
+                    """
+                    input[0] = channel.of([[id: 'setup'], file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.fasta', checkIfExists: true), file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/genome.gtf', checkIfExists: true)])
+                    input[1] = channel.of([[:], []])
+                    input[2] = channel.of([[:], []])
+                    input[3] = channel.of([[:], []])
+                    """
+                }
+            }
+            run("SIMPLEAF_QUANT") {
+                script "../../../../modules/nf-core/simpleaf/quant/main.nf"
+                process {
+                    """
+                    meta = [id: 'setup']
+                    reads = [file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R1_001.fastq.gz', checkIfExists: true), file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R2_001.fastq.gz', checkIfExists: true)]
+                    input[0] = channel.of([meta, '10xv3', reads])
+                    input[1] = SIMPLEAF_INDEX.out.index.combine(SIMPLEAF_INDEX.out.t2g, by: 0)
+                    input[2] = channel.of([[:], 'knee', [], []])
+                    input[3] = channel.of('cr-like')
+                    input[4] = channel.of([[], null])
+                    """
+                }
+            }
+        }
+        when {
+            workflow {
+                """
+                input[0] = null
+                input[1] = null
+                input[2] = null
+                input[3] = null
+                input[4] = null
+                input[5] = null
+                input[6] = null
+                input[7] = null
+                input[8] = true
+                input[9] = 'cr-like'
+                input[10] = null
+                input[11] = SIMPLEAF_QUANT.out.map
+                """ }
+        }
+        then {
+            assert workflow.success
+            assert snapshot(sanitizeOutput(workflow.out)).match()
+        }
+    }
+
+    test("transcript fasta and txp2gene") {
+        setup {
+            run("SIMPLEAF_INDEX") {
+                script "../../../../modules/nf-core/simpleaf/index/main.nf"
+                process {
+                    """
+                    input[0] = channel.of([[:], [], []])
+                    input[1] = channel.of([[id: 'setup'], file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/transcriptome.fasta', checkIfExists: true)])
+                    input[2] = channel.of([[:], []])
+                    input[3] = channel.of([[:], []])
+                    """
+                }
+            }
+        }
+        when {
+            workflow {
+                """
+                input[0] = null
+                input[1] = null
+                input[2] = file(params.modules_testdata_base_path + 'genomics/homo_sapiens/genome/transcriptome.fasta', checkIfExists: true)
+                input[3] = null
+                input[4] = SIMPLEAF_INDEX.out.t2g
+                input[5] = null
+                input[6] = '10xv3'
+                input[7] = null
+                input[8] = true
+                input[9] = 'cr-like'
+                input[10] = channel.of([[id: 'test'], [file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R1_001.fastq.gz', checkIfExists: true), file(params.modules_testdata_base_path + 'genomics/homo_sapiens/10xgenomics/cellranger/5k_cmvpos_tcells/fastqs/gex_1/subsampled_5k_human_antiCMV_T_TBNK_connect_GEX_1_S1_L001_R2_001.fastq.gz', checkIfExists: true)]])
+                input[11] = null
+                """ }
+        }
+        then {
+            assert workflow.success
+            assert snapshot(sanitizeOutput(workflow.out)).match()
+        }
+    }
+}
